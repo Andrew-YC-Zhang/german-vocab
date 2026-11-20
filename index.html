@@ -100,9 +100,23 @@
       </aside>
 
       <article class="detail-pane" id="detailPane" aria-label="单词详情">
-        <button type="button" class="mobile-back-btn" id="btnMobileBack">
-          ← 返回单词列表
-        </button>
+        <div class="detail-nav-bar hidden" id="detailNavBar">
+          <button type="button" class="mobile-back-btn" id="btnMobileBack">
+            ← 返回列表
+          </button>
+          <div class="detail-nav-meta">
+            <span class="detail-position" id="detailPosition">1 / 10</span>
+            <span class="detail-nav-hint" id="detailNavHint">左右滑或按 ← → 切词</span>
+          </div>
+          <div class="detail-nav-btns">
+            <button type="button" class="nav-step-btn" id="btnPrevWord" title="上一个单词（左方向键 / 右滑）">
+              ‹ 上一个
+            </button>
+            <button type="button" class="nav-step-btn" id="btnNextWord" title="下一个单词（右方向键 / 左滑）">
+              下一个 ›
+            </button>
+          </div>
+        </div>
         <div id="detailContent" class="detail-content"></div>
       </article>
     </section>

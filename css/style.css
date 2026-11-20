@@ -495,18 +495,111 @@ button {
 
 .detail-pane {
   min-width: 0;
+  touch-action: pan-y;
+}
+
+.detail-nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
 }
 
 .mobile-back-btn {
   display: none;
   border: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--surface-subtle);
   color: var(--text);
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 600;
-  margin-bottom: 12px;
+}
+
+.detail-nav-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.detail-position {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-soft);
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.detail-nav-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.detail-nav-btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-step-btn {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  padding: 5px 11px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.nav-step-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.nav-step-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+@keyframes slideFromRight {
+  from {
+    opacity: 0.35;
+    transform: translateX(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideFromLeft {
+  from {
+    opacity: 0.35;
+    transform: translateX(-26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.detail-card.slide-next {
+  animation: slideFromRight 0.22s ease-out;
+}
+
+.detail-card.slide-prev {
+  animation: slideFromLeft 0.22s ease-out;
 }
 
 .detail-card {
@@ -897,21 +990,62 @@ button {
   min-width: 0;
 }
 
+.example-de-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.example-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  background: #e2e8f0;
+  color: #334155;
+}
+
+/* 名词四格徽章配色 */
+.example-tag.tag-nominativ { background: #dbeafe; color: #1d4ed8; }
+.example-tag.tag-akkusativ { background: #fee2e2; color: #b91c1c; }
+.example-tag.tag-dativ { background: #fef3c7; color: #b45309; }
+.example-tag.tag-genitiv { background: #d1fae5; color: #047857; }
+
+/* 动词三时态徽章配色 */
+.example-tag.tag-prasens { background: #ede9fe; color: #6d28d9; }
+.example-tag.tag-prateritum { background: #fce7f3; color: #be185d; }
+.example-tag.tag-perfekt { background: #e0f2fe; color: #0369a1; }
+
 .example-de {
   font-size: 15.5px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text);
   cursor: pointer;
+  line-height: 1.5;
 }
 
 .example-de:hover {
   color: var(--primary);
 }
 
+.ex-highlight {
+  font-weight: 800;
+  color: #1e40af;
+  background: #dbeafe;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
 .example-zh {
   font-size: 14px;
   color: var(--text-secondary);
-  margin-top: 4px;
+  margin-top: 5px;
 }
 
 .example-en {
@@ -1186,15 +1320,50 @@ button {
   .browse-layout.mobile-detail-open .mobile-back-btn {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
+  }
+
+  .detail-nav-bar {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .detail-nav-hint {
+    display: none;
+  }
+
+  .nav-step-btn {
+    padding: 5px 9px;
+    font-size: 12.5px;
   }
 
   .detail-card {
-    padding: 18px 16px;
+    padding: 18px 15px;
   }
 
   .word-headline {
     font-size: 26px;
+  }
+
+  /* 手机端表格自适应屏宽，避免横向滚动与左右滑动切词冲突 */
+  .table-wrap {
+    overflow-x: visible;
+  }
+
+  .grammar-table {
+    table-layout: fixed;
+    font-size: 13px;
+  }
+
+  .grammar-table th,
+  .grammar-table td {
+    padding: 8px 7px;
+    word-break: break-word;
+  }
+
+  .grammar-table th:first-child,
+  .grammar-table td:first-child {
+    width: 31%;
   }
 
   .verb-tenses,

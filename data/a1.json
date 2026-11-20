@@ -8,7 +8,6 @@
     "ipa": "/ˈɛndɐn/",
     "regularity": "规则动词 (regelmäßig)",
     "auxiliary": "haben",
-    "similarIds": ["a1-apfel"],
     "meanings": [
       {
         "zh": "改变，更改，修改（计划、密码、内容等）",
@@ -33,19 +32,25 @@
     },
     "examples": [
       {
-        "de": "Wir müssen unseren Plan leider ändern.",
-        "zh": "遗憾的是，我们必须更改我们的计划。",
-        "en": "Unfortunately, we have to change our plan."
-      },
-      {
-        "de": "Kannst du bitte dein Passwort ändern?",
-        "zh": "请你修改一下你的密码好吗？",
-        "en": "Could you please change your password?"
-      },
-      {
+        "tag": "Präsens",
         "de": "Das Wetter ändert sich im Frühling sehr schnell.",
+        "highlight": ["ändert"],
         "zh": "春天的天气变化非常快。",
         "en": "The weather changes very quickly in spring."
+      },
+      {
+        "tag": "Präteritum",
+        "de": "Er änderte gestern seinen Plan.",
+        "highlight": ["änderte"],
+        "zh": "他昨天更改了自己的计划。",
+        "en": "He changed his plan yesterday."
+      },
+      {
+        "tag": "Perfekt",
+        "de": "Ich habe mein Passwort schon geändert.",
+        "highlight": ["habe", "geändert"],
+        "zh": "我已经修改了我的密码。",
+        "en": "I have already changed my password."
       }
     ]
   },
@@ -73,17 +78,30 @@
     },
     "examples": [
       {
-        "de": "Ich esse jeden Morgen einen frischen Apfel.",
-        "zh": "我每天早上吃一个新鲜苹果。",
-        "en": "I eat a fresh apple every morning."
+        "tag": "Nominativ",
+        "de": "Der Apfel liegt auf dem Küchentisch.",
+        "highlight": ["Der Apfel"],
+        "zh": "这个苹果放在厨房桌子上。",
+        "en": "The apple is lying on the kitchen table."
       },
       {
-        "de": "Die Äpfel auf dem Markt sind heute sehr süß.",
-        "zh": "市场上的苹果今天非常甜。",
-        "en": "The apples at the market are very sweet today."
+        "tag": "Akkusativ",
+        "de": "Ich esse den Apfel nach dem Mittagessen.",
+        "highlight": ["den Apfel"],
+        "zh": "我午饭后吃这个苹果。",
+        "en": "I eat the apple after lunch."
       },
       {
+        "tag": "Dativ",
+        "de": "Mit dem Apfel backe ich heute einen Kuchen.",
+        "highlight": ["dem Apfel"],
+        "zh": "今天我用这个苹果烤一个蛋糕。",
+        "en": "Today I am baking a cake with the apple."
+      },
+      {
+        "tag": "Genitiv",
         "de": "Der Geschmack des Apfels gefällt mir sehr gut.",
+        "highlight": ["des Apfels"],
         "zh": "我非常喜欢这个苹果的味道。",
         "en": "I really like the taste of the apple."
       }
@@ -118,19 +136,32 @@
     },
     "examples": [
       {
-        "de": "Ich gehe zur Bank und hebe Geld ab.",
-        "zh": "我去银行取钱。",
-        "en": "I am going to the bank to withdraw money."
-      },
-      {
-        "de": "Im Park sitzen zwei Kinder auf einer Bank.",
-        "zh": "公园里有两个孩子坐在长椅上。",
-        "en": "Two children are sitting on a bench in the park."
-      },
-      {
-        "de": "Die Banken öffnen am Montag um neun Uhr.",
+        "tag": "Nominativ",
+        "de": "Die Bank öffnet am Montag um neun Uhr.",
+        "highlight": ["Die Bank"],
         "zh": "银行周一上午九点开门。",
-        "en": "The banks open at nine o'clock on Monday."
+        "en": "The bank opens at nine o'clock on Monday."
+      },
+      {
+        "tag": "Akkusativ",
+        "de": "Ich suche die Bank in der Nähe vom Bahnhof.",
+        "highlight": ["die Bank"],
+        "zh": "我在找火车站附近的那家银行。",
+        "en": "I am looking for the bank near the train station."
+      },
+      {
+        "tag": "Dativ",
+        "de": "Zwei Kinder sitzen im Park auf der Bank.",
+        "highlight": ["der Bank"],
+        "zh": "公园里有两个孩子坐在那张长椅上。",
+        "en": "Two children are sitting on the bench in the park."
+      },
+      {
+        "tag": "Genitiv",
+        "de": "Die Farbe der Bank im Park ist dunkelgrün.",
+        "highlight": ["der Bank"],
+        "zh": "公园里那张长椅的颜色是深绿色的。",
+        "en": "The color of the bench in the park is dark green."
       }
     ]
   },
@@ -162,17 +193,30 @@
     },
     "examples": [
       {
-        "de": "Abends lese ich gern ein spannendes Buch.",
-        "zh": "晚上我喜欢读一本引人入胜的书。",
-        "en": "In the evening I like to read an exciting book."
+        "tag": "Nominativ",
+        "de": "Das Buch ist wirklich sehr spannend.",
+        "highlight": ["Das Buch"],
+        "zh": "这本书真的非常引人入胜。",
+        "en": "The book is really very exciting."
       },
       {
-        "de": "Viele alte Bücher stehen in diesem Regal.",
-        "zh": "这个书架上放着许多旧书。",
-        "en": "Many old books stand on this shelf."
+        "tag": "Akkusativ",
+        "de": "Abends lese ich das Buch im Bett.",
+        "highlight": ["das Buch"],
+        "zh": "晚上我在床上读这本书。",
+        "en": "In the evening I read the book in bed."
       },
       {
+        "tag": "Dativ",
+        "de": "In dem Buch stehen viele schöne Geschichten.",
+        "highlight": ["dem Buch"],
+        "zh": "这本书里有许多精彩的故事。",
+        "en": "There are many wonderful stories in the book."
+      },
+      {
+        "tag": "Genitiv",
         "de": "Der Titel des Buches ist leicht zu merken.",
+        "highlight": ["des Buches"],
         "zh": "这本书的书名很容易记住。",
         "en": "The title of the book is easy to remember."
       }
@@ -212,17 +256,23 @@
     },
     "examples": [
       {
-        "de": "Morgen fahren wir mit dem Zug nach Berlin.",
-        "zh": "明天我们坐火车去柏林。",
-        "en": "Tomorrow we are going to Berlin by train."
-      },
-      {
+        "tag": "Präsens",
         "de": "Er fährt bei Regen immer sehr vorsichtig.",
+        "highlight": ["fährt"],
         "zh": "他在下雨天开车总是非常小心。",
         "en": "He always drives very carefully in the rain."
       },
       {
+        "tag": "Präteritum",
+        "de": "Letzten Sommer fuhr meine Familie mit dem Zug nach Berlin.",
+        "highlight": ["fuhr"],
+        "zh": "去年夏天我们全家坐火车去了柏林。",
+        "en": "Last summer my family went to Berlin by train."
+      },
+      {
+        "tag": "Perfekt",
         "de": "Am Wochenende bin ich mit dem Fahrrad in den Park gefahren.",
+        "highlight": ["bin", "gefahren"],
         "zh": "周末我骑自行车去了公园。",
         "en": "On the weekend I rode my bicycle to the park."
       }
@@ -262,14 +312,25 @@
     },
     "examples": [
       {
+        "tag": "Präsens",
         "de": "Meine Großeltern leben seit zwanzig Jahren in München.",
+        "highlight": ["leben"],
         "zh": "我的祖父母已经在慕尼黑生活了二十年。",
         "en": "My grandparents have lived in Munich for twenty years."
       },
       {
-        "de": "Sie lebt sehr gesund und macht jeden Tag Sport.",
-        "zh": "她生活得很健康，每天都运动。",
-        "en": "She lives very healthily and exercises every day."
+        "tag": "Präteritum",
+        "de": "Früher lebte sie in einer kleinen Stadt am Meer.",
+        "highlight": ["lebte"],
+        "zh": "以前她住在海边的一座小城里。",
+        "en": "She used to live in a small town by the sea."
+      },
+      {
+        "tag": "Perfekt",
+        "de": "Er hat drei Jahre lang in Hamburg gelebt.",
+        "highlight": ["hat", "gelebt"],
+        "zh": "他曾在汉堡生活了三年。",
+        "en": "He lived in Hamburg for three years."
       }
     ]
   },
@@ -307,14 +368,25 @@
     },
     "examples": [
       {
+        "tag": "Präsens",
         "de": "Ich liebe meine Familie über alles.",
+        "highlight": ["liebe"],
         "zh": "我爱我的家人胜过一切。",
         "en": "I love my family above all else."
       },
       {
-        "de": "Er liebt frischen Kaffee am Morgen.",
-        "zh": "他非常喜欢早上喝一杯新鲜咖啡。",
-        "en": "He loves fresh coffee in the morning."
+        "tag": "Präteritum",
+        "de": "Als Kind liebte er Geschichten über Tiere.",
+        "highlight": ["liebte"],
+        "zh": "小时候他非常喜欢关于动物的故事。",
+        "en": "As a child, he loved stories about animals."
+      },
+      {
+        "tag": "Perfekt",
+        "de": "Sie hat diesen ruhigen Ort immer geliebt.",
+        "highlight": ["hat", "geliebt"],
+        "zh": "她一直很喜爱这个安静的地方。",
+        "en": "She has always loved this quiet place."
       }
     ]
   },
@@ -347,19 +419,32 @@
     },
     "examples": [
       {
-        "de": "Deutsch ist eine sehr interessante Sprache.",
-        "zh": "德语是一门非常有趣的语言。",
-        "en": "German is a very interesting language."
+        "tag": "Nominativ",
+        "de": "Die Sprache ist der Schlüssel zu einer neuen Kultur.",
+        "highlight": ["Die Sprache"],
+        "zh": "语言是通往新文化的钥匙。",
+        "en": "Language is the key to a new culture."
       },
       {
-        "de": "Sie lernt gern fremde Sprachen.",
-        "zh": "她很喜欢学习外语。",
-        "en": "She enjoys learning foreign languages."
+        "tag": "Akkusativ",
+        "de": "Sie lernt die Sprache jeden Tag mit viel Freude.",
+        "highlight": ["die Sprache"],
+        "zh": "她每天都很开心地学习这门语言。",
+        "en": "She learns the language every day with great joy."
       },
       {
-        "de": "Vor Überraschung fand er kaum die Sprache.",
-        "zh": "他惊讶得几乎说不出话来。",
-        "en": "Out of surprise, he could barely find his voice."
+        "tag": "Dativ",
+        "de": "In der Sprache gibt es viele spannende Wörter.",
+        "highlight": ["der Sprache"],
+        "zh": "这门语言里有很多有趣的词汇。",
+        "en": "There are many fascinating words in this language."
+      },
+      {
+        "tag": "Genitiv",
+        "de": "Die Grammatik der Sprache ist am Anfang etwas schwer.",
+        "highlight": ["der Sprache"],
+        "zh": "这门语言的语法一开始有点难。",
+        "en": "The grammar of the language is a bit difficult at the beginning."
       }
     ]
   },
@@ -401,17 +486,23 @@
     },
     "examples": [
       {
+        "tag": "Präsens",
         "de": "Sprichst du Deutsch oder Englisch?",
+        "highlight": ["Sprichst"],
         "zh": "你会说德语还是英语？",
         "en": "Do you speak German or English?"
       },
       {
-        "de": "Wir müssen morgen über das Projekt sprechen.",
-        "zh": "我们明天必须谈一下这个项目。",
-        "en": "We have to talk about the project tomorrow."
+        "tag": "Präteritum",
+        "de": "Auf der Reise sprach sie sehr gut Deutsch.",
+        "highlight": ["sprach"],
+        "zh": "旅行途中她德语说得非常好。",
+        "en": "During the trip she spoke German very well."
       },
       {
+        "tag": "Perfekt",
         "de": "Gestern habe ich lange mit meiner Lehrerin gesprochen.",
+        "highlight": ["habe", "gesprochen"],
         "zh": "昨天我和我的老师聊了很久。",
         "en": "Yesterday I spoke with my teacher for a long time."
       }
@@ -446,14 +537,32 @@
     },
     "examples": [
       {
-        "de": "Wie heißt diese Straße?",
-        "zh": "这条街叫什么名字？",
-        "en": "What is the name of this street?"
+        "tag": "Nominativ",
+        "de": "Die Straße vor unserem Haus ist heute sehr ruhig.",
+        "highlight": ["Die Straße"],
+        "zh": "我们家门前的街道今天非常安静。",
+        "en": "The street in front of our house is very quiet today."
       },
       {
-        "de": "Am Abend sind die Straßen im Zentrum sehr ruhig.",
-        "zh": "晚上市中心的街道非常安静。",
-        "en": "In the evening, the streets in the city center are very quiet."
+        "tag": "Akkusativ",
+        "de": "Wir überqueren die Straße an der Ampel.",
+        "highlight": ["die Straße"],
+        "zh": "我们在红绿灯处过马路。",
+        "en": "We cross the street at the traffic light."
+      },
+      {
+        "tag": "Dativ",
+        "de": "Auf der Straße fahren am Morgen viele Busse.",
+        "highlight": ["der Straße"],
+        "zh": "早晨这条街上有很多公交车行驶。",
+        "en": "Many buses drive along the street in the morning."
+      },
+      {
+        "tag": "Genitiv",
+        "de": "Der Name der Straße steht auf dem blauen Schild.",
+        "highlight": ["der Straße"],
+        "zh": "这条街的名字写在蓝色路牌上。",
+        "en": "The name of the street is written on the blue sign."
       }
     ]
   }

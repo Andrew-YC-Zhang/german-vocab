@@ -16,6 +16,7 @@
     searchQuery: '',
     activeLetter: 'ALL',
     selectedWordId: null,
+    detailTransition: null, // 'next' | 'prev' | null
     reviewScope: 'level', // 'level' | 'all'
     reviewQueue: [],
     reviewRevealed: false,
@@ -41,6 +42,10 @@
     listMeta: document.getElementById('listMeta'),
     wordList: document.getElementById('wordList'),
     detailPane: document.getElementById('detailPane'),
+    detailNavBar: document.getElementById('detailNavBar'),
+    detailPosition: document.getElementById('detailPosition'),
+    btnPrevWord: document.getElementById('btnPrevWord'),
+    btnNextWord: document.getElementById('btnNextWord'),
     detailContent: document.getElementById('detailContent'),
     btnMobileBack: document.getElementById('btnMobileBack'),
     scopeLevel: document.getElementById('scopeLevel'),
@@ -161,6 +166,66 @@
     if (wordObj.pos !== 'noun' || !wordObj.article) return '';
     const cls = 'article-' + (wordObj.gender || 'm');
     return '<span class="article-tag ' + cls + '">' + escapeHtml(wordObj.article) + '</span>';
+  }
+
+  function escapeRegExp(str) {
+    return String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function getExampleTagClass(tag) {
+    const norm = String(tag || '')
+      .trim()
+      .toLowerCase()
+      .replace(/ä/g, 'a')
+      .replace(/ö/g, 'o')
+      .replace(/ü/g, 'u');
+    if (norm.startsWith('nominativ')) return 'tag-nominativ';
+    if (norm.startsWith('akkusativ')) return 'tag-akkusativ';
+    if (norm.startsWith('dativ')) return 'tag-dativ';
+    if (norm.startsWith('genitiv')) return 'tag-genitiv';
+    if (norm.startsWith('prasens')) return 'tag-prasens';
+    if (norm.startsWith('prateritum')) return 'tag-prateritum';
+    if (norm.startsWith('perfekt')) return 'tag-perfekt';
+    return '';
+  }
+
+  function getCleanExampleText(ex) {
+    return String((ex && ex.de) || '').replace(/\*\*(.+?)\*\*/g, '$1');
+  }
+
+  function formatExampleDeHtml(ex) {
+    const raw = String((ex && ex.de) || '');
+    // 支持在 de 文本中手写 **重点词**，同时也支持独立的 highlight 数组/字符串字段
+    if (/\*\*(.+?)\*\*/.test(raw)) {
+      return escapeHtml(raw).replace(/\*\*(.+?)\*\*/g, '<strong class="ex-highlight">$1</strong>');
+    }
+
+    const safe = escapeHtml(raw);
+    let targets = [];
+    if (Array.isArray(ex && ex.highlight)) {
+      targets = ex.highlight;
+    } else if (typeof (ex && ex.highlight) === 'string' && ex.highlight.trim()) {
+      targets = [ex.highlight.trim()];
+    }
+
+    const cleaned = targets
+      .map((t) => escapeHtml(String(t || '').trim()))
+      .filter(Boolean)
+      .sort((a, b) => b.length - a.length);
+
+    if (cleaned.length === 0) return safe;
+
+    try {
+      const pattern = new RegExp(
+        '(?<![\\p{L}\\p{N}])(' + cleaned.map(escapeRegExp).join('|') + ')(?![\\p{L}\\p{N}])',
+        'gu'
+      );
+      return safe.replace(pattern, '<strong class="ex-highlight">$1</strong>');
+    } catch (_err) {
+      // 兼容极老浏览器不支持 lookbehind 的场景
+      const fallback = new RegExp('(' + cleaned.map(escapeRegExp).join('|') + ')', 'g');
+      return safe.replace(fallback, '<strong class="ex-highlight">$1</strong>');
+    }
   }
 
   // 给变格表中的定冠词加粗配色
@@ -308,6 +373,7 @@
         '<div style="padding:28px 14px;text-align:center;color:var(--text-muted);font-size:14px;">未找到与“' +
         escapeHtml(state.searchQuery) +
         '”匹配的单词。</div>';
+      updateDetailNavBar();
       return;
     }
 
@@ -526,18 +592,30 @@
 
     let examplesHtml = '';
     (w.examples || []).forEach((ex) => {
+      const speakSentence = getCleanExampleText(ex);
+      const tagLabel =
+        ex.tag || (w.pos !== 'noun' && w.pos !== 'verb' ? w.posLabel || '例句' : '例句');
+      const tagClass = getExampleTagClass(tagLabel);
+
       examplesHtml +=
         '<div class="example-item">' +
         '<button type="button" class="speak-icon-btn" data-speak="' +
-        escapeHtml(ex.de) +
+        escapeHtml(speakSentence) +
         '" title="朗读例句" aria-label="朗读例句">' +
         speakerSvg() +
         '</button>' +
         '<div class="example-body">' +
-        '<div class="example-de" data-speak="' +
-        escapeHtml(ex.de) +
+        '<div class="example-de-row">' +
+        '<span class="example-tag ' +
+        tagClass +
+        '">' +
+        escapeHtml(tagLabel) +
+        '</span>' +
+        '<span class="example-de" data-speak="' +
+        escapeHtml(speakSentence) +
         '" title="点击朗读德语例句">' +
-        escapeHtml(ex.de) +
+        formatExampleDeHtml(ex) +
+        '</span>' +
         '</div>' +
         '<div class="example-zh">' +
         escapeHtml(ex.zh) +
@@ -553,8 +631,12 @@
       ? '<div class="word-note">💡 ' + escapeHtml(w.note) + '</div>'
       : '';
 
+    const transitionClass = opts.transition ? ' slide-' + opts.transition : '';
+
     return (
-      '<div class="detail-card">' +
+      '<div class="detail-card' +
+      transitionClass +
+      '">' +
       '<div class="detail-top-bar">' +
       '<div class="tag-row">' +
       '<span class="pos-badge ' +
@@ -610,7 +692,54 @@
     );
   }
 
+  function updateDetailNavBar() {
+    const filtered = getFilteredWords();
+    const idx = filtered.findIndex((item) => item.id === state.selectedWordId);
+    if (filtered.length === 0 || idx === -1) {
+      els.detailNavBar.classList.add('hidden');
+      return;
+    }
+
+    els.detailNavBar.classList.remove('hidden');
+    els.detailPosition.textContent = '第 ' + (idx + 1) + ' / ' + filtered.length + ' 词';
+    els.btnPrevWord.disabled = idx <= 0;
+    els.btnNextWord.disabled = idx >= filtered.length - 1;
+  }
+
+  function navigateWord(delta) {
+    if (state.currentMode !== 'browse') return;
+    const filtered = getFilteredWords();
+    if (filtered.length === 0) return;
+
+    const currentIdx = filtered.findIndex((item) => item.id === state.selectedWordId);
+    if (currentIdx === -1) return;
+
+    const nextIdx = currentIdx + delta;
+    if (nextIdx < 0) {
+      showToast('已经是第一个单词了');
+      return;
+    }
+    if (nextIdx >= filtered.length) {
+      showToast('已经是最后一个单词了');
+      return;
+    }
+
+    window.GermanSpeech.stop();
+    state.selectedWordId = filtered[nextIdx].id;
+    state.detailTransition = delta > 0 ? 'next' : 'prev';
+    renderWordList();
+
+    // 同步桌面端左侧列表选中项可见，移动端则回到详情顶部
+    const selectedBtn = els.wordList.querySelector('.word-item.selected');
+    if (selectedBtn && window.innerWidth > 860) {
+      selectedBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else if (window.innerWidth <= 860) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
   function renderEmptyDetail(title, desc, showBackToA1) {
+    els.detailNavBar.classList.add('hidden');
     els.detailContent.innerHTML =
       '<div class="empty-card">' +
       '<div class="empty-icon">📚</div>' +
@@ -637,7 +766,13 @@
       renderEmptyDetail('请选择一个单词', '点击左侧列表中的任意德语单词，查看完整释义、变格/变位表和例句。', false);
       return;
     }
-    els.detailContent.innerHTML = buildWordCardHtml(w, { hideStudyControls: false });
+    const transition = state.detailTransition;
+    state.detailTransition = null;
+    updateDetailNavBar();
+    els.detailContent.innerHTML = buildWordCardHtml(w, {
+      hideStudyControls: false,
+      transition: transition
+    });
   }
 
   // ==================== 今日复习（SM-2）渲染 ====================
@@ -914,11 +1049,84 @@
       }
     });
 
-    // 移动端返回列表
+    // 移动端返回列表 & 上一个/下一个按钮
     els.btnMobileBack.addEventListener('click', () => {
       els.browseView.classList.remove('mobile-detail-open');
       window.GermanSpeech.stop();
     });
+
+    els.btnPrevWord.addEventListener('click', () => navigateWord(-1));
+    els.btnNextWord.addEventListener('click', () => navigateWord(1));
+
+    // 详情页左右滑动切换单词（防误触：水平距离 > 50px 且明显大于垂直滑动距离）
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchTracking = false;
+
+    function isInsideHorizontalScroller(target) {
+      let node = target;
+      while (node && node !== els.detailPane && node !== document.body) {
+        if (node.scrollWidth > node.clientWidth + 4) {
+          const style = window.getComputedStyle(node);
+          if (style.overflowX === 'auto' || style.overflowX === 'scroll') {
+            return true;
+          }
+        }
+        node = node.parentElement;
+      }
+      return false;
+    }
+
+    els.detailPane.addEventListener(
+      'touchstart',
+      (e) => {
+        if (state.currentMode !== 'browse') return;
+        if (!e.touches || e.touches.length !== 1) {
+          touchTracking = false;
+          return;
+        }
+        if (isInsideHorizontalScroller(e.target)) {
+          touchTracking = false;
+          return;
+        }
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchTracking = true;
+      },
+      { passive: true }
+    );
+
+    els.detailPane.addEventListener(
+      'touchcancel',
+      () => {
+        touchTracking = false;
+      },
+      { passive: true }
+    );
+
+    els.detailPane.addEventListener(
+      'touchend',
+      (e) => {
+        if (!touchTracking || state.currentMode !== 'browse') return;
+        touchTracking = false;
+        if (!e.changedTouches || e.changedTouches.length === 0) return;
+
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        const absX = Math.abs(dx);
+        const absY = Math.abs(dy);
+
+        // 水平位移超过 50px 且明显大于垂直位移（> 1.5 倍），避免上下滑看例句时误触
+        if (absX > 50 && absX > absY * 1.5) {
+          if (dx < 0) {
+            navigateWord(1); // 左滑 -> 下一个单词
+          } else {
+            navigateWord(-1); // 右滑 -> 上一个单词
+          }
+        }
+      },
+      { passive: true }
+    );
 
     // 全局事件委托：朗读 & 详情卡片操作 & 复习操作
     document.addEventListener('click', (e) => {
@@ -996,10 +1204,23 @@
       renderReviewView();
     });
 
-    // 桌面快捷键支持（复习模式：空格显示答案，1-4 选择掌握度）
+    // 桌面快捷键支持（浏览模式：← → 切词；复习模式：空格显示答案，1-4 选择掌握度）
     document.addEventListener('keydown', (e) => {
+      const tag = e.target && e.target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+      if (state.currentMode === 'browse') {
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          navigateWord(-1);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          navigateWord(1);
+        }
+        return;
+      }
+
       if (state.currentMode !== 'review') return;
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (state.reviewQueue.length === 0) return;
 
       if (!state.reviewRevealed && (e.code === 'Space' || e.code === 'Enter')) {

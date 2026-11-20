@@ -1,4 +1,4 @@
-const CACHE_NAME = 'deutschwort-cache-v1';
+const CACHE_NAME = 'deutschwort-cache-v2';
 
 const CORE_ASSETS = [
   './',
