@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="description" content="纯前端德语分级背单词 PWA，支持 A1-B2 分级、德语字母排序、名词四格变格、动词变位、语音朗读与 SM-2 记忆曲线复习。" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="DeutschWort" />
+  <title>DeutschWort · 德语分级词库</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-top">
+        <div class="brand">
+          <div class="brand-badge" aria-hidden="true">
+            <span>DE</span>
+            <i class="tricolor"></i>
+          </div>
+          <div class="brand-text">
+            <h1>DeutschWort</h1>
+            <p>德语分级词库 · SM-2 记忆复习</p>
+          </div>
+        </div>
+
+        <nav class="mode-switch" aria-label="主模式切换">
+          <button type="button" class="mode-btn active" data-mode="browse" id="btnModeBrowse">
+            词库浏览
+          </button>
+          <button type="button" class="mode-btn" data-mode="review" id="btnModeReview">
+            今日复习
+            <span class="due-badge hidden" id="dueBadge">0</span>
+          </button>
+        </nav>
+
+        <div class="header-actions">
+          <button type="button" class="ghost-btn" id="btnExport" title="导出学习进度为 JSON 文件">
+            导出进度
+          </button>
+          <button type="button" class="ghost-btn" id="btnImport" title="从 JSON 文件恢复学习进度">
+            导入恢复
+          </button>
+          <input type="file" id="importFileInput" accept=".json,application/json" hidden />
+        </div>
+      </div>
+
+      <div class="header-sub">
+        <div class="level-tabs" role="tablist" aria-label="CEFR 难度等级">
+          <button type="button" class="level-tab active" data-level="a1" role="tab" aria-selected="true">
+            A1 <span class="tab-count" id="count-a1">0</span>
+          </button>
+          <button type="button" class="level-tab" data-level="a2" role="tab" aria-selected="false">
+            A2 <span class="tab-count" id="count-a2">0</span>
+          </button>
+          <button type="button" class="level-tab" data-level="b1" role="tab" aria-selected="false">
+            B1 <span class="tab-count" id="count-b1">0</span>
+          </button>
+          <button type="button" class="level-tab" data-level="b2" role="tab" aria-selected="false">
+            B2 <span class="tab-count" id="count-b2">0</span>
+          </button>
+        </div>
+
+        <div class="progress-summary" id="progressSummary">
+          加载词库中...
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <!-- 浏览词库模式 -->
+    <section class="browse-layout" id="browseView" aria-label="词库浏览">
+      <aside class="list-pane" aria-label="单词列表与搜索">
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <line x1="20" y1="20" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="search"
+            id="searchInput"
+            placeholder="搜索德语单词、中文或英文释义..."
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button type="button" class="clear-btn hidden" id="btnClearSearch" aria-label="清除搜索">×</button>
+        </div>
+
+        <div class="alpha-bar" id="alphaBar" aria-label="字母快速跳转"></div>
+
+        <div class="list-meta" id="listMeta"></div>
+
+        <div class="word-list" id="wordList" role="listbox" aria-label="按德语字母排序的单词列表"></div>
+      </aside>
+
+      <article class="detail-pane" id="detailPane" aria-label="单词详情">
+        <button type="button" class="mobile-back-btn" id="btnMobileBack">
+          ← 返回单词列表
+        </button>
+        <div id="detailContent" class="detail-content"></div>
+      </article>
+    </section>
+
+    <!-- 今日复习模式 -->
+    <section class="review-layout hidden" id="reviewView" aria-label="SM-2 今日复习">
+      <div class="review-toolbar">
+        <div class="review-scope">
+          <button type="button" class="scope-chip active" data-scope="level" id="scopeLevel">当前等级</button>
+          <button type="button" class="scope-chip" data-scope="all" id="scopeAll">全部等级</button>
+        </div>
+        <div class="review-counter" id="reviewCounter"></div>
+      </div>
+
+      <div id="reviewStage" class="review-stage"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="./js/speech.js" defer></script>
+  <script src="./js/sm2.js" defer></script>
+  <script src="./js/app.js" defer></script>
+</body>
+</html>

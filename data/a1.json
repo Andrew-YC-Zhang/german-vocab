@@ -1,0 +1,460 @@
+[
+  {
+    "id": "a1-aendern",
+    "word": "ändern",
+    "level": "A1",
+    "pos": "verb",
+    "posLabel": "动词 · 规则",
+    "ipa": "/ˈɛndɐn/",
+    "regularity": "规则动词 (regelmäßig)",
+    "auxiliary": "haben",
+    "similarIds": ["a1-apfel"],
+    "meanings": [
+      {
+        "zh": "改变，更改，修改（计划、密码、内容等）",
+        "en": "to change, to alter, to modify"
+      },
+      {
+        "zh": "（sich ändern）发生变化，改变",
+        "en": "to change (intransitive / reflexive)"
+      }
+    ],
+    "conjugation": {
+      "present": {
+        "ich": "ändere",
+        "du": "änderst",
+        "er_sie_es": "ändert",
+        "wir": "ändern",
+        "ihr": "ändert",
+        "sie_Sie": "ändern"
+      },
+      "praeteritum": "änderte",
+      "perfekt": "hat geändert"
+    },
+    "examples": [
+      {
+        "de": "Wir müssen unseren Plan leider ändern.",
+        "zh": "遗憾的是，我们必须更改我们的计划。",
+        "en": "Unfortunately, we have to change our plan."
+      },
+      {
+        "de": "Kannst du bitte dein Passwort ändern?",
+        "zh": "请你修改一下你的密码好吗？",
+        "en": "Could you please change your password?"
+      },
+      {
+        "de": "Das Wetter ändert sich im Frühling sehr schnell.",
+        "zh": "春天的天气变化非常快。",
+        "en": "The weather changes very quickly in spring."
+      }
+    ]
+  },
+  {
+    "id": "a1-apfel",
+    "word": "Apfel",
+    "article": "der",
+    "gender": "m",
+    "plural": "Äpfel",
+    "level": "A1",
+    "pos": "noun",
+    "posLabel": "阳性名词",
+    "ipa": "/ˈapfəl/",
+    "meanings": [
+      {
+        "zh": "苹果",
+        "en": "apple"
+      }
+    ],
+    "declension": {
+      "nominativ": { "singular": "der Apfel", "plural": "die Äpfel" },
+      "akkusativ": { "singular": "den Apfel", "plural": "die Äpfel" },
+      "dativ": { "singular": "dem Apfel", "plural": "den Äpfeln" },
+      "genitiv": { "singular": "des Apfels", "plural": "der Äpfel" }
+    },
+    "examples": [
+      {
+        "de": "Ich esse jeden Morgen einen frischen Apfel.",
+        "zh": "我每天早上吃一个新鲜苹果。",
+        "en": "I eat a fresh apple every morning."
+      },
+      {
+        "de": "Die Äpfel auf dem Markt sind heute sehr süß.",
+        "zh": "市场上的苹果今天非常甜。",
+        "en": "The apples at the market are very sweet today."
+      },
+      {
+        "de": "Der Geschmack des Apfels gefällt mir sehr gut.",
+        "zh": "我非常喜欢这个苹果的味道。",
+        "en": "I really like the taste of the apple."
+      }
+    ]
+  },
+  {
+    "id": "a1-bank",
+    "word": "Bank",
+    "article": "die",
+    "gender": "f",
+    "plural": "Banken / Bänke",
+    "level": "A1",
+    "pos": "noun",
+    "posLabel": "阴性名词",
+    "ipa": "/baŋk/",
+    "note": "多义词复数不同：表示“银行”时复数为 die Banken；表示“长椅”时复数为 die Bänke。",
+    "meanings": [
+      {
+        "zh": "银行（金融机构；复数：die Banken）",
+        "en": "bank (financial institution; plural: die Banken)"
+      },
+      {
+        "zh": "长椅，长凳（复数：die Bänke）",
+        "en": "bench, long seat (plural: die Bänke)"
+      }
+    ],
+    "declension": {
+      "nominativ": { "singular": "die Bank", "plural": "die Banken / die Bänke" },
+      "akkusativ": { "singular": "die Bank", "plural": "die Banken / die Bänke" },
+      "dativ": { "singular": "der Bank", "plural": "den Banken / den Bänken" },
+      "genitiv": { "singular": "der Bank", "plural": "der Banken / der Bänke" }
+    },
+    "examples": [
+      {
+        "de": "Ich gehe zur Bank und hebe Geld ab.",
+        "zh": "我去银行取钱。",
+        "en": "I am going to the bank to withdraw money."
+      },
+      {
+        "de": "Im Park sitzen zwei Kinder auf einer Bank.",
+        "zh": "公园里有两个孩子坐在长椅上。",
+        "en": "Two children are sitting on a bench in the park."
+      },
+      {
+        "de": "Die Banken öffnen am Montag um neun Uhr.",
+        "zh": "银行周一上午九点开门。",
+        "en": "The banks open at nine o'clock on Monday."
+      }
+    ]
+  },
+  {
+    "id": "a1-buch",
+    "word": "Buch",
+    "article": "das",
+    "gender": "n",
+    "plural": "Bücher",
+    "level": "A1",
+    "pos": "noun",
+    "posLabel": "中性名词",
+    "ipa": "/buːx/",
+    "meanings": [
+      {
+        "zh": "书，书籍，读物",
+        "en": "book, volume"
+      },
+      {
+        "zh": "账簿，记录册（如记账本、日记簿）",
+        "en": "ledger, account book, register"
+      }
+    ],
+    "declension": {
+      "nominativ": { "singular": "das Buch", "plural": "die Bücher" },
+      "akkusativ": { "singular": "das Buch", "plural": "die Bücher" },
+      "dativ": { "singular": "dem Buch", "plural": "den Büchern" },
+      "genitiv": { "singular": "des Buches (des Buchs)", "plural": "der Bücher" }
+    },
+    "examples": [
+      {
+        "de": "Abends lese ich gern ein spannendes Buch.",
+        "zh": "晚上我喜欢读一本引人入胜的书。",
+        "en": "In the evening I like to read an exciting book."
+      },
+      {
+        "de": "Viele alte Bücher stehen in diesem Regal.",
+        "zh": "这个书架上放着许多旧书。",
+        "en": "Many old books stand on this shelf."
+      },
+      {
+        "de": "Der Titel des Buches ist leicht zu merken.",
+        "zh": "这本书的书名很容易记住。",
+        "en": "The title of the book is easy to remember."
+      }
+    ]
+  },
+  {
+    "id": "a1-fahren",
+    "word": "fahren",
+    "level": "A1",
+    "pos": "verb",
+    "posLabel": "动词 · 不规则",
+    "ipa": "/ˈfaːʁən/",
+    "regularity": "不规则动词 (unregelmäßig，a → ä)",
+    "auxiliary": "sein",
+    "note": "表示“乘车前往/行驶”时用助动词 sein（ist gefahren）；带第四格宾语表示“驾驶某辆车”时可用 haben（hat gefahren）。",
+    "meanings": [
+      {
+        "zh": "乘坐（车、船等交通工具）前往，行驶",
+        "en": "to travel, to go (by vehicle), to ride"
+      },
+      {
+        "zh": "驾驶，开（汽车、自行车等）",
+        "en": "to drive, to operate (a vehicle)"
+      }
+    ],
+    "conjugation": {
+      "present": {
+        "ich": "fahre",
+        "du": "fährst",
+        "er_sie_es": "fährt",
+        "wir": "fahren",
+        "ihr": "fahrt",
+        "sie_Sie": "fahren"
+      },
+      "praeteritum": "fuhr",
+      "perfekt": "ist gefahren (及物时亦可用 hat gefahren)"
+    },
+    "examples": [
+      {
+        "de": "Morgen fahren wir mit dem Zug nach Berlin.",
+        "zh": "明天我们坐火车去柏林。",
+        "en": "Tomorrow we are going to Berlin by train."
+      },
+      {
+        "de": "Er fährt bei Regen immer sehr vorsichtig.",
+        "zh": "他在下雨天开车总是非常小心。",
+        "en": "He always drives very carefully in the rain."
+      },
+      {
+        "de": "Am Wochenende bin ich mit dem Fahrrad in den Park gefahren.",
+        "zh": "周末我骑自行车去了公园。",
+        "en": "On the weekend I rode my bicycle to the park."
+      }
+    ]
+  },
+  {
+    "id": "a1-leben",
+    "word": "leben",
+    "level": "A1",
+    "pos": "verb",
+    "posLabel": "动词 · 规则",
+    "ipa": "/ˈleːbən/",
+    "regularity": "规则动词 (regelmäßig)",
+    "auxiliary": "haben",
+    "note": "拼写易与 lieben（爱）混淆：leben 只有 e，表示“生活/活着”。",
+    "meanings": [
+      {
+        "zh": "活着，生存",
+        "en": "to live, to be alive"
+      },
+      {
+        "zh": "生活，居住（在某地或以某种方式生活）",
+        "en": "to live, to reside"
+      }
+    ],
+    "conjugation": {
+      "present": {
+        "ich": "lebe",
+        "du": "lebst",
+        "er_sie_es": "lebt",
+        "wir": "leben",
+        "ihr": "lebt",
+        "sie_Sie": "leben"
+      },
+      "praeteritum": "lebte",
+      "perfekt": "hat gelebt"
+    },
+    "examples": [
+      {
+        "de": "Meine Großeltern leben seit zwanzig Jahren in München.",
+        "zh": "我的祖父母已经在慕尼黑生活了二十年。",
+        "en": "My grandparents have lived in Munich for twenty years."
+      },
+      {
+        "de": "Sie lebt sehr gesund und macht jeden Tag Sport.",
+        "zh": "她生活得很健康，每天都运动。",
+        "en": "She lives very healthily and exercises every day."
+      }
+    ]
+  },
+  {
+    "id": "a1-lieben",
+    "word": "lieben",
+    "level": "A1",
+    "pos": "verb",
+    "posLabel": "动词 · 规则",
+    "ipa": "/ˈliːbən/",
+    "regularity": "规则动词 (regelmäßig)",
+    "auxiliary": "haben",
+    "note": "拼写易与 leben（生活）混淆：lieben 含长音 ie，表示“爱/喜爱”。",
+    "meanings": [
+      {
+        "zh": "爱，深爱（某人）",
+        "en": "to love (someone)"
+      },
+      {
+        "zh": "非常喜爱，热爱（某事物或活动）",
+        "en": "to love, to be very fond of (something)"
+      }
+    ],
+    "conjugation": {
+      "present": {
+        "ich": "liebe",
+        "du": "liebst",
+        "er_sie_es": "liebt",
+        "wir": "lieben",
+        "ihr": "liebt",
+        "sie_Sie": "lieben"
+      },
+      "praeteritum": "liebte",
+      "perfekt": "hat geliebt"
+    },
+    "examples": [
+      {
+        "de": "Ich liebe meine Familie über alles.",
+        "zh": "我爱我的家人胜过一切。",
+        "en": "I love my family above all else."
+      },
+      {
+        "de": "Er liebt frischen Kaffee am Morgen.",
+        "zh": "他非常喜欢早上喝一杯新鲜咖啡。",
+        "en": "He loves fresh coffee in the morning."
+      }
+    ]
+  },
+  {
+    "id": "a1-sprache",
+    "word": "Sprache",
+    "article": "die",
+    "gender": "f",
+    "plural": "Sprachen",
+    "level": "A1",
+    "pos": "noun",
+    "posLabel": "阴性名词",
+    "ipa": "/ˈʃpʁaːxə/",
+    "note": "同根拼写对比：die Sprache（名词，语言）与 sprechen（动词，说）。",
+    "meanings": [
+      {
+        "zh": "语言，语种",
+        "en": "language"
+      },
+      {
+        "zh": "言语，说话能力，表达方式",
+        "en": "speech, faculty of speech, manner of speaking"
+      }
+    ],
+    "declension": {
+      "nominativ": { "singular": "die Sprache", "plural": "die Sprachen" },
+      "akkusativ": { "singular": "die Sprache", "plural": "die Sprachen" },
+      "dativ": { "singular": "der Sprache", "plural": "den Sprachen" },
+      "genitiv": { "singular": "der Sprache", "plural": "der Sprachen" }
+    },
+    "examples": [
+      {
+        "de": "Deutsch ist eine sehr interessante Sprache.",
+        "zh": "德语是一门非常有趣的语言。",
+        "en": "German is a very interesting language."
+      },
+      {
+        "de": "Sie lernt gern fremde Sprachen.",
+        "zh": "她很喜欢学习外语。",
+        "en": "She enjoys learning foreign languages."
+      },
+      {
+        "de": "Vor Überraschung fand er kaum die Sprache.",
+        "zh": "他惊讶得几乎说不出话来。",
+        "en": "Out of surprise, he could barely find his voice."
+      }
+    ]
+  },
+  {
+    "id": "a1-sprechen",
+    "word": "sprechen",
+    "level": "A1",
+    "pos": "verb",
+    "posLabel": "动词 · 不规则",
+    "ipa": "/ˈʃpʁɛçən/",
+    "regularity": "不规则动词 (unregelmäßig，e → i)",
+    "auxiliary": "haben",
+    "note": "同根拼写对比：sprechen（动词，说）与 die Sprache（名词，语言）。",
+    "meanings": [
+      {
+        "zh": "说话，讲话",
+        "en": "to speak, to talk"
+      },
+      {
+        "zh": "会说（某种语言）",
+        "en": "to speak (a language)"
+      },
+      {
+        "zh": "谈论，交谈（常搭配 mit + Dat. / über + Akk.）",
+        "en": "to talk with, to discuss"
+      }
+    ],
+    "conjugation": {
+      "present": {
+        "ich": "spreche",
+        "du": "sprichst",
+        "er_sie_es": "spricht",
+        "wir": "sprechen",
+        "ihr": "sprecht",
+        "sie_Sie": "sprechen"
+      },
+      "praeteritum": "sprach",
+      "perfekt": "hat gesprochen"
+    },
+    "examples": [
+      {
+        "de": "Sprichst du Deutsch oder Englisch?",
+        "zh": "你会说德语还是英语？",
+        "en": "Do you speak German or English?"
+      },
+      {
+        "de": "Wir müssen morgen über das Projekt sprechen.",
+        "zh": "我们明天必须谈一下这个项目。",
+        "en": "We have to talk about the project tomorrow."
+      },
+      {
+        "de": "Gestern habe ich lange mit meiner Lehrerin gesprochen.",
+        "zh": "昨天我和我的老师聊了很久。",
+        "en": "Yesterday I spoke with my teacher for a long time."
+      }
+    ]
+  },
+  {
+    "id": "a1-strasse",
+    "word": "Straße",
+    "article": "die",
+    "gender": "f",
+    "plural": "Straßen",
+    "level": "A1",
+    "pos": "noun",
+    "posLabel": "阴性名词",
+    "ipa": "/ˈʃtʁaːsə/",
+    "note": "含德语特有字母 ß（Eszett），排序时视同 ss；注意与 die Sprache 区分拼写。",
+    "meanings": [
+      {
+        "zh": "街道，马路",
+        "en": "street, road"
+      },
+      {
+        "zh": "公路，交通干道",
+        "en": "highway, thoroughfare"
+      }
+    ],
+    "declension": {
+      "nominativ": { "singular": "die Straße", "plural": "die Straßen" },
+      "akkusativ": { "singular": "die Straße", "plural": "die Straßen" },
+      "dativ": { "singular": "der Straße", "plural": "den Straßen" },
+      "genitiv": { "singular": "der Straße", "plural": "der Straßen" }
+    },
+    "examples": [
+      {
+        "de": "Wie heißt diese Straße?",
+        "zh": "这条街叫什么名字？",
+        "en": "What is the name of this street?"
+      },
+      {
+        "de": "Am Abend sind die Straßen im Zentrum sehr ruhig.",
+        "zh": "晚上市中心的街道非常安静。",
+        "en": "In the evening, the streets in the city center are very quiet."
+      }
+    ]
+  }
+]
