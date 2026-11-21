@@ -32,6 +32,7 @@
       scopeAll: '全部等级',
       scopeLevel: (lv) => '当前等级 (' + lv + ')',
       loadingVocab: '加载词库中...',
+      loadingLevel: (lv) => '正在加载 ' + lv + ' 词库...',
       progressSummary: (lv, learned, total, due) =>
         lv + '：已学 ' + learned + ' / ' + total + ' 词 · 今日待复习 ' + due + ' 词',
       alphaAll: '全部',
@@ -45,8 +46,9 @@
         '.json</code> 填入词条。',
       emptyLevelTitle: (lv) => lv + ' 词库待扩充',
       emptyLevelDesc:
-        '目前完整词库已收录在 A1 中，您可以切换到 A1 体验全部功能，或后续按相同 JSON 格式扩充此等级词库。',
+        '目前完整词库已收录在 A1 和 A2 中，您可以切换到 A1 或 A2 体验全部功能，或后续按相同 JSON 格式扩充此等级词库。',
       jumpA1: '切换到 A1 词库',
+      jumpA2: '切换到 A2 词库',
       noSearchResult: (q) => '未找到与“' + q + '”匹配的单词。',
       selectWordTitle: '请选择一个单词',
       selectWordDesc: '点击左侧列表中的任意德语单词，查看完整释义、变格/变位表和例句。',
@@ -82,8 +84,9 @@
       auxChip: (aux) => '助动词：' + aux,
       reviewCounter: (done, rem) => '本次已完成 ' + done + ' 词 · 队列剩余 ' + rem + ' 词',
       reviewEmptyLevelTitle: '当前等级暂无词条',
-      reviewEmptyLevelDesc: '您可以切换到 A1 词库，或点击上方「全部等级」开始复习。',
+      reviewEmptyLevelDesc: '您可以切换到 A1 或 A2 词库，或点击上方「全部等级」开始复习。',
       switchToA1Short: '切换到 A1',
+      switchToA2Short: '切换到 A2',
       reviewDoneCurrent: '已复习完当前到期单词！',
       reviewNoDue: '今日暂无到期复习词',
       reviewUnlearnedDescHtml: (n) =>
@@ -228,6 +231,7 @@
       scopeAll: 'All Levels',
       scopeLevel: (lv) => 'Level ' + lv,
       loadingVocab: 'Loading vocabulary...',
+      loadingLevel: (lv) => 'Loading ' + lv + ' vocabulary...',
       progressSummary: (lv, learned, total, due) =>
         lv + ': ' + learned + ' / ' + total + ' learned · ' + due + ' due today',
       alphaAll: 'All',
@@ -241,8 +245,9 @@
         '.json</code> to expand this level.',
       emptyLevelTitle: (lv) => lv + ' Vocabulary Coming Soon',
       emptyLevelDesc:
-        'The complete vocabulary is currently available in A1. Switch to A1 to explore all features, or add entries to this level using the same JSON format.',
+        'Complete vocabulary sets are currently available in A1 and A2. Switch to A1 or A2 to explore all features, or add entries to this level using the same JSON format.',
       jumpA1: 'Switch to A1',
+      jumpA2: 'Switch to A2',
       noSearchResult: (q) => 'No words found matching "' + q + '".',
       selectWordTitle: 'Select a word',
       selectWordDesc:
@@ -279,8 +284,9 @@
       auxChip: (aux) => 'Aux: ' + aux,
       reviewCounter: (done, rem) => 'Completed ' + done + ' · Remaining ' + rem,
       reviewEmptyLevelTitle: 'No words in this level yet',
-      reviewEmptyLevelDesc: 'Switch to A1 or select "All Levels" above to start reviewing.',
+      reviewEmptyLevelDesc: 'Switch to A1 or A2, or select "All Levels" above to start reviewing.',
       switchToA1Short: 'Switch to A1',
+      switchToA2Short: 'Switch to A2',
       reviewDoneCurrent: 'All due cards reviewed!',
       reviewNoDue: 'No cards due today',
       reviewUnlearnedDescHtml: (n) =>
@@ -438,6 +444,8 @@
   const state = {
     lang: loadSavedLang(), // 'zh' | 'en'
     vocabByLevel: { a1: [], a2: [], b1: [], b2: [] },
+    loadedLevels: {},
+    loadingPromises: {},
     allWordsMap: {},
     currentLevel: 'a1',
     currentMode: 'browse', // 'browse' | 'review'
@@ -707,7 +715,7 @@
     if (w.pos === 'noun') {
       const pl = String(w.plural || '');
       const lbl = String(w.posLabel || '');
-      if (lbl.includes('复数名词') || pl.includes('仅复数') || pl.includes('常用复数')) {
+      if (lbl.includes('复数名词') || pl.includes('仅复数') || pl.includes('常用复数') || pl.includes('多用复数')) {
         return 'Plural Noun';
       }
       if (w.gender === 'm') return 'Masculine Noun';
@@ -717,6 +725,8 @@
     if (w.pos === 'verb') {
       const reg = String(w.regularity || '') + ' ' + String(w.posLabel || '');
       if (/Modalverb|情态动词/i.test(reg)) return 'Modal Verb';
+      if (/双变位/.test(reg)) return 'Verb · Dual Conjugation';
+      const isPhrase = /动词短语/.test(reg);
       const sep = /trennbar|可分/i.test(reg) && !/untrennbar|不可分/i.test(reg);
       const insep = /untrennbar|不可分/i.test(reg);
       const irreg = /unregelmäßig|不规则/i.test(reg);
@@ -729,7 +739,7 @@
       if (mixed) parts.push('Mixed');
       else if (irreg) parts.push('Irregular');
       else parts.push('Regular');
-      return 'Verb · ' + parts.join(', ');
+      return (isPhrase ? 'Verb Phrase · ' : 'Verb · ') + parts.join(', ');
     }
     const map = {
       adjective: 'Adjective',
@@ -752,10 +762,22 @@
     if (/Modalverb|情态动词/i.test(raw)) {
       return raw.includes('Konjunktiv II') ? 'Modal verb (Konjunktiv II of mögen)' : 'Modal verb (Modalverb)';
     }
+    if (/双变位/.test(raw)) {
+      return 'Dual-conjugation verb (intransitive irregular hing / gehangen; transitive regular hängte / gehängt)';
+    }
     const parenMatch = raw.match(/\(([^)]+)\)/);
     let germanDetail = parenMatch ? parenMatch[1] : '';
     germanDetail = germanDetail
       .replace(/，/g, ', ')
+      .replace(/；/g, '; ')
+      .replace(/第一人称单数省去\s*e/g, '1st sg. drops -e')
+      .replace(/过去分词不加\s*ge-/g, 'no ge- in Perfekt')
+      .replace(/过去分词无\s*ge-/g, 'no ge- in Perfekt')
+      .replace(/-ieren\s*结尾无\s*ge-/g, '-ieren, no ge- in Perfekt')
+      .replace(/词干变化/g, 'stem change')
+      .replace(/可选/g, 'optional')
+      .replace(/表“做到\/完成”/g, "meaning 'manage / accomplish'")
+      .replace(/同\s+/g, 'like ')
       .replace(/\s*结尾/g, '')
       .trim();
     const tags = [];
@@ -767,26 +789,32 @@
     else if (/unregelmäßig|不规则/i.test(raw)) tags.push('Irregular');
     else if (/regelmäßig|规则/i.test(raw)) tags.push('Regular');
     if (/Hilfsverb|助动词/i.test(raw)) tags.push('Auxiliary');
-    const base = (tags.length > 0 ? tags.join(', ') : 'Verb') + (tags.includes('Verb') ? '' : ' verb');
-    return germanDetail ? base + ' (' + germanDetail + ')' : base;
+    const nounType = /动词短语/.test(raw) ? 'verb phrase' : 'verb';
+    const base = (tags.length > 0 ? tags.join(', ') : 'Verb') + (tags.includes('Verb') ? '' : ' ' + nounType);
+    return germanDetail && !CJK_REGEX.test(germanDetail) ? base + ' (' + germanDetail + ')' : base;
   }
 
   function localizeGrammarNote(text) {
     const raw = String(text || '');
     if (!isEn() || !CJK_REGEX.test(raw)) return raw;
     return raw
+      .replace(/\(通常无复数\/无冠词\)/g, '(uncountable / no article)')
       .replace(/\(通常无复数\)/g, '(uncountable)')
       .replace(/\(不可数\)/g, '(uncountable)')
       .replace(/\(无复数\)/g, '(no plural)')
       .replace(/\(通常仅用单数\)/g, '(usually singular)')
+      .replace(/\(口语单数\)/g, '(colloquial singular)')
       .replace(/\(少用\)/g, '(rare)')
       .replace(/\(此义仅复数\)/g, '(plural only)')
       .replace(/\(仅复数\)/g, '(plural only)')
       .replace(/\(常用复数\)/g, '(usually plural)')
+      .replace(/\(多用复数\)/g, '(usually plural)')
       .replace(/\(无单数\)/g, '(no singular)')
       .replace(/\(通常无冠词\)/g, '(usually no article)')
       .replace(/\(定冠词后\)/g, '(after def. article)')
       .replace(/\(无冠词\)/g, '(no article)')
+      .replace(/\(多用第三人称\)/g, '(mostly 3rd person)')
+      .replace(/\(通常仅用 es\)/g, '(usually impersonal: es)')
       .replace(/\(数词后保持单数 Grad\)/g, '(singular after numbers: Grad)')
       .replace(/\(数词后用 Grad\)/g, '(singular after numbers: Grad)')
       .replace(/\(楼层\)/g, '(floors)')
@@ -1299,8 +1327,7 @@
   function updateHeaderStats() {
     const progress = window.SM2Store.loadAll();
     const today = window.SM2Store.getTodayStr();
-    const allWords = getAllWords();
-    const totalDue = allWords.filter((w) => progress[w.id] && window.SM2Store.isDue(progress[w.id], today)).length;
+    const totalDue = Object.keys(progress).filter((id) => window.SM2Store.isDue(progress[id], today)).length;
 
     if (totalDue > 0) {
       els.dueBadge.textContent = String(totalDue);
@@ -1309,11 +1336,18 @@
       els.dueBadge.classList.add('hidden');
     }
 
+    const levelLabel = state.currentLevel.toUpperCase();
+    const dict = t();
+
+    if (!state.loadedLevels[state.currentLevel]) {
+      els.progressSummary.textContent = dict.loadingLevel(levelLabel);
+      els.scopeLevel.textContent = dict.scopeLevel(levelLabel);
+      return;
+    }
+
     const levelWords = state.vocabByLevel[state.currentLevel] || [];
     const learnedInLevel = levelWords.filter((w) => Boolean(progress[w.id])).length;
     const dueInLevel = levelWords.filter((w) => progress[w.id] && window.SM2Store.isDue(progress[w.id], today)).length;
-    const levelLabel = state.currentLevel.toUpperCase();
-    const dict = t();
 
     els.progressSummary.textContent = dict.progressSummary(
       levelLabel,
@@ -1836,7 +1870,7 @@
     }
   }
 
-  function renderEmptyDetail(title, desc, showBackToA1) {
+  function renderEmptyDetail(title, desc, showBackToLevels) {
     els.detailNavBar.classList.add('hidden');
     els.detailContent.innerHTML =
       '<div class="empty-card">' +
@@ -1847,9 +1881,11 @@
       '<p>' +
       escapeHtml(desc) +
       '</p>' +
-      (showBackToA1
+      (showBackToLevels
         ? '<div class="empty-actions"><button type="button" class="primary-btn" id="btnJumpA1">' +
           escapeHtml(t().jumpA1) +
+          '</button><button type="button" class="secondary-btn" id="btnJumpA2">' +
+          escapeHtml(t().jumpA2) +
           '</button></div>'
         : '') +
       '</div>';
@@ -1857,6 +1893,10 @@
     const jumpBtn = document.getElementById('btnJumpA1');
     if (jumpBtn) {
       jumpBtn.addEventListener('click', () => switchLevel('a1'));
+    }
+    const jumpA2Btn = document.getElementById('btnJumpA2');
+    if (jumpA2Btn) {
+      jumpA2Btn.addEventListener('click', () => switchLevel('a2'));
     }
   }
 
@@ -1910,6 +1950,9 @@
           '<div class="empty-actions">' +
           '<button type="button" class="primary-btn" data-review-action="switch-a1">' +
           escapeHtml(dict.switchToA1Short) +
+          '</button>' +
+          '<button type="button" class="secondary-btn" data-review-action="switch-a2">' +
+          escapeHtml(dict.switchToA2Short) +
           '</button>' +
           '</div></div>';
         return;
@@ -2073,7 +2116,7 @@
 
   // ==================== 切换与交互事件 ====================
 
-  function switchMode(mode) {
+  async function switchMode(mode) {
     window.GermanSpeech.stop();
     state.currentMode = mode;
 
@@ -2083,14 +2126,39 @@
     els.reviewView.classList.toggle('hidden', mode !== 'review');
 
     if (mode === 'review') {
+      if (state.reviewScope === 'all') {
+        const hasUnloaded = LEVELS.some((lv) => !state.loadedLevels[lv]);
+        if (hasUnloaded) {
+          els.reviewStage.innerHTML =
+            '<div class="empty-card"><div class="empty-icon">⏳</div><h2>' +
+            escapeHtml(t().loadingVocab) +
+            '</h2></div>';
+          await ensureAllLevelsLoaded();
+          if (state.currentMode !== 'review') return;
+        }
+      } else if (!state.loadedLevels[state.currentLevel]) {
+        els.reviewStage.innerHTML =
+          '<div class="empty-card"><div class="empty-icon">⏳</div><h2>' +
+          escapeHtml(t().loadingLevel(state.currentLevel.toUpperCase())) +
+          '</h2></div>';
+        await ensureLevelLoaded(state.currentLevel);
+        if (state.currentMode !== 'review') return;
+      }
+      updateHeaderStats();
       rebuildReviewQueue();
       renderReviewView();
     } else {
+      if (!state.loadedLevels[state.currentLevel]) {
+        await ensureLevelLoaded(state.currentLevel);
+        if (state.currentMode !== 'browse') return;
+      }
+      updateHeaderStats();
+      renderAlphaBar();
       renderWordList();
     }
   }
 
-  function switchLevel(level) {
+  async function switchLevel(level) {
     if (!LEVELS.includes(level)) return;
     window.GermanSpeech.stop();
     state.currentLevel = level;
@@ -2105,6 +2173,25 @@
       tab.classList.toggle('active', isActive);
       tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
     });
+
+    if (!state.loadedLevels[level]) {
+      const loadingMsg = t().loadingLevel(level.toUpperCase());
+      updateHeaderStats();
+      if (state.currentMode === 'review') {
+        els.reviewStage.innerHTML =
+          '<div class="empty-card"><div class="empty-icon">⏳</div><h2>' +
+          escapeHtml(loadingMsg) +
+          '</h2></div>';
+      } else {
+        els.detailNavBar.classList.add('hidden');
+        els.wordList.innerHTML =
+          '<div style="padding:28px 14px;text-align:center;color:var(--text-muted);font-size:14px;">' +
+          escapeHtml(loadingMsg) +
+          '</div>';
+      }
+      await ensureLevelLoaded(level);
+      if (state.currentLevel !== level) return;
+    }
 
     updateHeaderStats();
     renderAlphaBar();
@@ -2324,6 +2411,8 @@
           switchMode('browse');
         } else if (act === 'switch-a1') {
           switchLevel('a1');
+        } else if (act === 'switch-a2') {
+          switchLevel('a2');
         } else if (act === 'add-unlearned') {
           const pool =
             state.reviewScope === 'all'
@@ -2339,18 +2428,37 @@
     });
 
     // 复习范围切换
-    els.scopeLevel.addEventListener('click', () => {
+    els.scopeLevel.addEventListener('click', async () => {
       state.reviewScope = 'level';
       els.scopeLevel.classList.add('active');
       els.scopeAll.classList.remove('active');
+      if (!state.loadedLevels[state.currentLevel]) {
+        els.reviewStage.innerHTML =
+          '<div class="empty-card"><div class="empty-icon">⏳</div><h2>' +
+          escapeHtml(t().loadingLevel(state.currentLevel.toUpperCase())) +
+          '</h2></div>';
+        await ensureLevelLoaded(state.currentLevel);
+        if (state.reviewScope !== 'level' || state.currentMode !== 'review') return;
+      }
+      updateHeaderStats();
       rebuildReviewQueue();
       renderReviewView();
     });
 
-    els.scopeAll.addEventListener('click', () => {
+    els.scopeAll.addEventListener('click', async () => {
       state.reviewScope = 'all';
       els.scopeAll.classList.add('active');
       els.scopeLevel.classList.remove('active');
+      const hasUnloaded = LEVELS.some((lv) => !state.loadedLevels[lv]);
+      if (hasUnloaded) {
+        els.reviewStage.innerHTML =
+          '<div class="empty-card"><div class="empty-icon">⏳</div><h2>' +
+          escapeHtml(t().loadingVocab) +
+          '</h2></div>';
+        await ensureAllLevelsLoaded();
+        if (state.reviewScope !== 'all' || state.currentMode !== 'review') return;
+      }
+      updateHeaderStats();
       rebuildReviewQueue();
       renderReviewView();
     });
@@ -2654,19 +2762,49 @@
     }
   }
 
-  // ==================== 数据加载与初始化 ====================
+  // ==================== 数据加载与初始化（按需加载 + 内存缓存） ====================
 
-  async function loadLevelData(level) {
-    try {
-      const res = await fetch('./data/' + level + '.json');
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const list = await res.json();
-      if (!Array.isArray(list)) return [];
-      return sortGermanWords(list);
-    } catch (err) {
-      console.warn('加载词库失败:', level, err);
-      return [];
+  async function ensureLevelLoaded(level) {
+    if (!LEVELS.includes(level)) return [];
+    if (state.loadedLevels[level]) {
+      return state.vocabByLevel[level] || [];
     }
+    if (state.loadingPromises[level]) {
+      return state.loadingPromises[level];
+    }
+
+    const promise = (async () => {
+      try {
+        const res = await fetch('./data/' + level + '.json');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const list = await res.json();
+        const sorted = Array.isArray(list) ? sortGermanWords(list) : [];
+        state.vocabByLevel[level] = sorted;
+        sorted.forEach((w) => {
+          state.allWordsMap[w.id] = w;
+        });
+        state.loadedLevels[level] = true;
+        const countEl = document.getElementById('count-' + level);
+        if (countEl) {
+          countEl.textContent = String(sorted.length);
+          countEl.classList.remove('hidden');
+        }
+        return sorted;
+      } catch (err) {
+        console.warn('加载词库失败:', level, err);
+        state.vocabByLevel[level] = [];
+        return [];
+      } finally {
+        delete state.loadingPromises[level];
+      }
+    })();
+
+    state.loadingPromises[level] = promise;
+    return promise;
+  }
+
+  async function ensureAllLevelsLoaded() {
+    await Promise.all(LEVELS.map((lv) => ensureLevelLoaded(lv)));
   }
 
   function registerServiceWorker() {
@@ -2680,7 +2818,7 @@
   }
 
   async function init() {
-    // 先初始化云同步与本地存储命名空间，再绑定事件并加载词库
+    // 先初始化云同步与本地存储命名空间，再绑定事件并按需加载当前等级词库
     if (window.SM2Store && window.CloudSync) {
       window.SM2Store.onChange(() => {
         window.CloudSync.pushCurrentProgress(state.lang);
@@ -2699,23 +2837,13 @@
 
     applyStaticTranslations();
     if (els.progressSummary) {
-      els.progressSummary.textContent = t().loadingVocab;
+      els.progressSummary.textContent = t().loadingLevel(state.currentLevel.toUpperCase());
     }
     bindEvents();
     registerServiceWorker();
 
-    const results = await Promise.all(LEVELS.map((lv) => loadLevelData(lv)));
-    LEVELS.forEach((lv, index) => {
-      const sorted = results[index];
-      state.vocabByLevel[lv] = sorted;
-      sorted.forEach((w) => {
-        state.allWordsMap[w.id] = w;
-      });
-      const countEl = document.getElementById('count-' + lv);
-      if (countEl) countEl.textContent = String(sorted.length);
-    });
-
-    const initialWords = state.vocabByLevel[state.currentLevel] || [];
+    // 首屏仅按需加载当前等级（默认 A1），切换至 A2/B1/B2 或跨等级复习时再按需拉取并缓存
+    const initialWords = await ensureLevelLoaded(state.currentLevel);
     if (initialWords.length > 0) {
       state.selectedWordId = initialWords[0].id;
     }
