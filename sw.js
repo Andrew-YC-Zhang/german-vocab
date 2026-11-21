@@ -1,4 +1,4 @@
-const CACHE_NAME = 'deutschwort-cache-v5';
+const CACHE_NAME = 'deutschwort-cache-v6';
 
 const CORE_ASSETS = [
   './',
@@ -46,11 +46,12 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
 
-  // 严格跳过 Firebase / Google APIs / 任何跨域网络请求，避免拦截认证与 Firestore 实时同步
+  // 严格跳过 Firebase / Google APIs / gstatic / 任何跨域网络请求，避免拦截认证与 Firestore 实时同步
   if (
     BYPASS_HOST_PATTERN.test(url.hostname) ||
     url.hostname.indexOf('firebase') !== -1 ||
     url.hostname.indexOf('googleapis') !== -1 ||
+    url.hostname.indexOf('gstatic') !== -1 ||
     url.origin !== self.location.origin
   ) {
     return;
