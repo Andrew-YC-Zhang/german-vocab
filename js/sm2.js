@@ -185,7 +185,14 @@
     return updated;
   }
 
-  function formatIntervalLabel(days) {
+  function formatIntervalLabel(days, lang) {
+    if (lang === 'en') {
+      if (days <= 0) return 'Again soon';
+      if (days === 1) return 'In 1 day';
+      if (days < 30) return 'In ' + days + ' days';
+      const months = (days / 30).toFixed(1).replace(/\.0$/, '');
+      return 'In ' + months + ' mo';
+    }
     if (days <= 0) return '稍后重学';
     if (days === 1) return '1 天后';
     if (days < 30) return days + ' 天后';
@@ -193,13 +200,13 @@
     return months + ' 个月后';
   }
 
-  function previewIntervals(wordId) {
+  function previewIntervals(wordId, lang) {
     const rec = getRecord(wordId) || createDefaultRecord(wordId);
     return {
-      again: formatIntervalLabel(calculateNext(rec, 'again').interval),
-      hard: formatIntervalLabel(calculateNext(rec, 'hard').interval),
-      good: formatIntervalLabel(calculateNext(rec, 'good').interval),
-      easy: formatIntervalLabel(calculateNext(rec, 'easy').interval)
+      again: formatIntervalLabel(calculateNext(rec, 'again').interval, lang),
+      hard: formatIntervalLabel(calculateNext(rec, 'hard').interval, lang),
+      good: formatIntervalLabel(calculateNext(rec, 'good').interval, lang),
+      easy: formatIntervalLabel(calculateNext(rec, 'easy').interval, lang)
     };
   }
 
@@ -209,13 +216,23 @@
     return String(record.nextReviewDate || '') <= today;
   }
 
-  function getStatusInfo(record) {
+  function getStatusInfo(record, lang) {
+    const isEn = lang === 'en';
     if (!record) {
-      return { code: 'new', label: '未加入复习', shortLabel: '新词' };
+      return isEn
+        ? { code: 'new', label: 'Not in review', shortLabel: 'New' }
+        : { code: 'new', label: '未加入复习', shortLabel: '新词' };
     }
     const today = getTodayStr();
     const delta = diffDays(today, record.nextReviewDate);
     if (delta <= 0) {
+      if (isEn) {
+        return {
+          code: 'due',
+          label: record.totalReviews > 0 ? 'Due today' : 'Ready to learn',
+          shortLabel: 'Due'
+        };
+      }
       return {
         code: 'due',
         label: record.totalReviews > 0 ? '今日待复习' : '待首次学习',
@@ -223,10 +240,24 @@
       };
     }
     if (record.interval >= 21) {
+      if (isEn) {
+        return {
+          code: 'mastered',
+          label: 'Mastered · in ' + delta + (delta === 1 ? ' day' : ' days'),
+          shortLabel: delta + 'd'
+        };
+      }
       return {
         code: 'mastered',
         label: '已熟悉 · ' + delta + ' 天后复习',
         shortLabel: delta + '天后'
+      };
+    }
+    if (isEn) {
+      return {
+        code: 'scheduled',
+        label: 'In ' + delta + (delta === 1 ? ' day' : ' days') + ' (' + record.nextReviewDate + ')',
+        shortLabel: delta + 'd'
       };
     }
     return {
@@ -250,12 +281,16 @@
     return typeof str === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(str);
   }
 
-  function importJSON(jsonText) {
+  function importJSON(jsonText, lang) {
+    const isEn = lang === 'en';
     let parsed;
     try {
       parsed = JSON.parse(jsonText);
     } catch (e) {
-      return { ok: false, error: '文件不是有效的 JSON 格式。' };
+      return {
+        ok: false,
+        error: isEn ? 'The file is not valid JSON.' : '文件不是有效的 JSON 格式。'
+      };
     }
 
     const rawProgress =
@@ -264,7 +299,10 @@
         : parsed;
 
     if (!rawProgress || typeof rawProgress !== 'object' || Array.isArray(rawProgress)) {
-      return { ok: false, error: 'JSON 中缺少有效的学习进度数据。' };
+      return {
+        ok: false,
+        error: isEn ? 'No valid learning progress data found in JSON.' : 'JSON 中缺少有效的学习进度数据。'
+      };
     }
 
     const today = getTodayStr();
@@ -291,11 +329,21 @@
     });
 
     if (count === 0 && Object.keys(rawProgress).length > 0) {
-      return { ok: false, error: '未识别到符合格式的学习进度记录，请检查导入文件。' };
+      return {
+        ok: false,
+        error: isEn
+          ? 'No valid progress records recognized. Please check the file.'
+          : '未识别到符合格式的学习进度记录，请检查导入文件。'
+      };
     }
 
     if (!saveAll(cleaned)) {
-      return { ok: false, error: '写入浏览器本地存储失败，请检查存储空间。' };
+      return {
+        ok: false,
+        error: isEn
+          ? 'Failed to save to browser storage. Please check available space.'
+          : '写入浏览器本地存储失败，请检查存储空间。'
+      };
     }
 
     return { ok: true, count: count };

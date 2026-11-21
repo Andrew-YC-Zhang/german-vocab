@@ -25,21 +25,25 @@
           </div>
           <div class="brand-text">
             <h1>DeutschWort</h1>
-            <p>德语分级词库 · SM-2 记忆复习</p>
+            <p id="brandSubtitle">德语分级词库 · SM-2 记忆复习</p>
           </div>
         </div>
 
-        <nav class="mode-switch" aria-label="主模式切换">
+        <nav class="mode-switch" id="modeSwitch" aria-label="主模式切换">
           <button type="button" class="mode-btn active" data-mode="browse" id="btnModeBrowse">
-            词库浏览
+            <span id="modeBrowseLabel">词库浏览</span>
           </button>
           <button type="button" class="mode-btn" data-mode="review" id="btnModeReview">
-            今日复习
+            <span id="modeReviewLabel">今日复习</span>
             <span class="due-badge hidden" id="dueBadge">0</span>
           </button>
         </nav>
 
         <div class="header-actions">
+          <div class="lang-switch" id="langSwitch" role="group" aria-label="语言切换 / Language">
+            <button type="button" class="lang-btn active" data-lang="zh" id="btnLangZh" aria-pressed="true">中文</button>
+            <button type="button" class="lang-btn" data-lang="en" id="btnLangEn" aria-pressed="false">EN</button>
+          </div>
           <button type="button" class="ghost-btn" id="btnExport" title="导出学习进度为 JSON 文件">
             导出进度
           </button>

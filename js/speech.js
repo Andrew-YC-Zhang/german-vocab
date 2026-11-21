@@ -48,9 +48,14 @@
 
   function speak(text, options) {
     const opts = options || {};
+    const isEn = opts.lang === 'en';
     if (!isSupported()) {
       if (typeof opts.onError === 'function') {
-        opts.onError('当前浏览器不支持语音朗读（Web Speech API）。');
+        opts.onError(
+          isEn
+            ? 'Speech synthesis (Web Speech API) is not supported in this browser.'
+            : '当前浏览器不支持语音朗读（Web Speech API）。'
+        );
       }
       return false;
     }
@@ -84,7 +89,11 @@
           return;
         }
         if (typeof opts.onError === 'function') {
-          opts.onError('朗读失败，请检查系统是否已安装德语语音包或取消静音。');
+          opts.onError(
+            isEn
+              ? 'Speech playback failed. Please check German voice availability or audio settings.'
+              : '朗读失败，请检查系统是否已安装德语语音包或取消静音。'
+          );
         }
       };
 
@@ -92,7 +101,9 @@
       return true;
     } catch (err) {
       if (typeof opts.onError === 'function') {
-        opts.onError('语音播放初始化失败。');
+        opts.onError(
+          isEn ? 'Failed to initialize speech playback.' : '语音播放初始化失败。'
+        );
       }
       return false;
     }

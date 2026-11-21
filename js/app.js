@@ -3,12 +3,260 @@
 
   const LEVELS = ['a1', 'a2', 'b1', 'b2'];
   const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  const LANG_STORAGE_KEY = 'deutschwort_lang_v1';
+  const CJK_REGEX = /[\u4e00-\u9fff]/;
   const germanCollator = new Intl.Collator('de-DE', {
     usage: 'sort',
     sensitivity: 'variant'
   });
 
+  const I18N = {
+    zh: {
+      htmlLang: 'zh-CN',
+      pageTitle: 'DeutschWort · 德语分级词库',
+      brandSubtitle: '德语分级词库 · SM-2 记忆复习',
+      modeBrowse: '词库浏览',
+      modeReview: '今日复习',
+      exportBtn: '导出进度',
+      exportTitle: '导出学习进度为 JSON 文件',
+      importBtn: '导入恢复',
+      importTitle: '从 JSON 文件恢复学习进度',
+      searchPlaceholder: '搜索德语单词、中文或英文释义...',
+      clearSearchLabel: '清除搜索',
+      mobileBack: '← 返回列表',
+      navHint: '左右滑或按 ← → 切词',
+      prevWord: '‹ 上一个',
+      prevWordTitle: '上一个单词（左方向键 / 右滑）',
+      nextWord: '下一个 ›',
+      nextWordTitle: '下一个单词（右方向键 / 左滑）',
+      scopeAll: '全部等级',
+      scopeLevel: (lv) => '当前等级 (' + lv + ')',
+      loadingVocab: '加载词库中...',
+      progressSummary: (lv, learned, total, due) =>
+        lv + '：已学 ' + learned + ' / ' + total + ' 词 · 今日待复习 ' + due + ' 词',
+      alphaAll: '全部',
+      listSortLabel: '按德语字母表排序（ä/ö/ü/ß）',
+      listCount: (n) => '共 ' + n + ' 词',
+      emptyLevelListHtml: (lv, file) =>
+        '当前 <strong>' +
+        lv +
+        '</strong> 词库暂未添加单词。<br/>后续可直接向 <code>data/' +
+        file +
+        '.json</code> 填入词条。',
+      emptyLevelTitle: (lv) => lv + ' 词库待扩充',
+      emptyLevelDesc:
+        '目前完整词库已收录在 A1 中，您可以切换到 A1 体验全部功能，或后续按相同 JSON 格式扩充此等级词库。',
+      jumpA1: '切换到 A1 词库',
+      noSearchResult: (q) => '未找到与“' + q + '”匹配的单词。',
+      selectWordTitle: '请选择一个单词',
+      selectWordDesc: '点击左侧列表中的任意德语单词，查看完整释义、变格/变位表和例句。',
+      detailPosition: (idx, total) => '第 ' + idx + ' / ' + total + ' 词',
+      toastFirstWord: '已经是第一个单词了',
+      toastLastWord: '已经是最后一个单词了',
+      articleLabel: '定冠词：',
+      pluralLabel: '复数：',
+      verbTypeLabel: '类型：',
+      verbAuxLabel: '完成时助动词：',
+      addStudyBtn: '+ 加入今日复习',
+      resetBtn: '重置',
+      resetTitle: '重置该词的记忆进度',
+      speakWordBtn: '朗读德语',
+      speakWordTitle: '点击朗读单词发音',
+      speakExampleBtnTitle: '朗读例句',
+      speakExampleTitle: '点击朗读德语例句',
+      meaningsTitle: '完整释义（中英对照）',
+      examplesTitle: '地道例句（点击德语句子可朗读）',
+      declensionTitle: '名词四格变格表 (Deklination)',
+      thCase: '格 (Kasus)',
+      thSingular: '单数 (Singular)',
+      thPlural: '复数 (Plural)',
+      caseSub: {
+        nominativ: '第一格 · 主格',
+        akkusativ: '第四格 · 宾格',
+        dativ: '第三格 · 与格',
+        genitiv: '第二格 · 属格'
+      },
+      conjugationTitle: '动词变位表 (Konjugation)',
+      praeteritumLabel: '过去式 (Präteritum)',
+      perfektLabel: '现在完成时 (Perfekt)',
+      auxChip: (aux) => '助动词：' + aux,
+      reviewCounter: (done, rem) => '本次已完成 ' + done + ' 词 · 队列剩余 ' + rem + ' 词',
+      reviewEmptyLevelTitle: '当前等级暂无词条',
+      reviewEmptyLevelDesc: '您可以切换到 A1 词库，或点击上方「全部等级」开始复习。',
+      switchToA1Short: '切换到 A1',
+      reviewDoneCurrent: '已复习完当前到期单词！',
+      reviewNoDue: '今日暂无到期复习词',
+      reviewUnlearnedDescHtml: (n) =>
+        '当前范围内还有 <strong>' +
+        n +
+        '</strong> 个未学习的新词。点击下方按钮即可加入 SM-2 记忆曲线队列开始今日练习。',
+      reviewAddUnlearned: (n) => '将这 ' + n + ' 个新词加入今日复习',
+      backToBrowse: '返回词库浏览',
+      reviewAllDoneTitle: '今日复习全部完成！',
+      reviewAllDoneDescHtml: (nextDate) =>
+        '太棒了！当前范围内的所有单词都已按 SM-2 记忆曲线排期。' +
+        (nextDate ? '下一次复习日期为 <strong>' + nextDate + '</strong>。' : ''),
+      flashcardHintNoun: '请回忆该名词的定冠词（der/die/das）、复数形式及中英文释义',
+      flashcardHintVerb: '请回忆该动词的现在时变位、过去式/完成时及中英文释义',
+      flashcardHintOther: '请回忆该词的词性、常见搭配及中英文释义',
+      flashcardSpeakTitle: '点击朗读单词',
+      flashcardSpeakBtn: '朗读单词',
+      revealBtn: '显示答案',
+      ratingPrompt: '请根据刚才的回忆情况选择掌握度（SM-2 算法将自动计算下次复习时间）',
+      rateAgain: '重来',
+      rateHard: '困难',
+      rateGood: '良好',
+      rateEasy: '简单',
+      toastAgain: '已重置，将在本次复习末尾再次出现',
+      toastNextReview: (date, days) => '下次复习：' + date + '（' + days + ' 天后）',
+      toastAddedStudy: '已加入今日复习队列',
+      toastRemovedStudy: '已重置该单词的学习记录',
+      toastAddedBatch: (n) => '已将 ' + n + ' 个新词加入今日复习',
+      toastExported: '已导出学习进度 JSON 文件',
+      toastImportFail: (err) => '导入失败：' + err,
+      toastImportOk: (n) => '已成功恢复 ' + n + ' 条学习进度',
+      toastReadFail: '读取文件失败，请重试',
+      toastLangSwitched: '已切换为中文界面'
+    },
+    en: {
+      htmlLang: 'en',
+      pageTitle: 'DeutschWort · German Vocabulary',
+      brandSubtitle: 'German Vocabulary · SM-2 Spaced Repetition',
+      modeBrowse: 'Browse',
+      modeReview: 'Review',
+      exportBtn: 'Export',
+      exportTitle: 'Export learning progress as JSON',
+      importBtn: 'Import',
+      importTitle: 'Restore learning progress from JSON',
+      searchPlaceholder: 'Search German words or English meanings...',
+      clearSearchLabel: 'Clear search',
+      mobileBack: '← Back',
+      navHint: 'Swipe or press ← →',
+      prevWord: '‹ Prev',
+      prevWordTitle: 'Previous word (Left arrow / Swipe right)',
+      nextWord: 'Next ›',
+      nextWordTitle: 'Next word (Right arrow / Swipe left)',
+      scopeAll: 'All Levels',
+      scopeLevel: (lv) => 'Level ' + lv,
+      loadingVocab: 'Loading vocabulary...',
+      progressSummary: (lv, learned, total, due) =>
+        lv + ': ' + learned + ' / ' + total + ' learned · ' + due + ' due today',
+      alphaAll: 'All',
+      listSortLabel: 'German alphabetical order (ä/ö/ü/ß)',
+      listCount: (n) => n + (n === 1 ? ' word' : ' words'),
+      emptyLevelListHtml: (lv, file) =>
+        'No words in <strong>' +
+        lv +
+        '</strong> yet.<br/>Add entries to <code>data/' +
+        file +
+        '.json</code> to expand this level.',
+      emptyLevelTitle: (lv) => lv + ' Vocabulary Coming Soon',
+      emptyLevelDesc:
+        'The complete vocabulary is currently available in A1. Switch to A1 to explore all features, or add entries to this level using the same JSON format.',
+      jumpA1: 'Switch to A1',
+      noSearchResult: (q) => 'No words found matching "' + q + '".',
+      selectWordTitle: 'Select a word',
+      selectWordDesc:
+        'Choose any German word from the list to view definitions, declension/conjugation tables, and examples.',
+      detailPosition: (idx, total) => idx + ' / ' + total,
+      toastFirstWord: 'Already at the first word',
+      toastLastWord: 'Already at the last word',
+      articleLabel: 'Article: ',
+      pluralLabel: 'Plural: ',
+      verbTypeLabel: 'Type: ',
+      verbAuxLabel: 'Auxiliary: ',
+      addStudyBtn: '+ Add to Review',
+      resetBtn: 'Reset',
+      resetTitle: 'Reset review progress for this word',
+      speakWordBtn: 'Pronounce',
+      speakWordTitle: 'Click to pronounce word',
+      speakExampleBtnTitle: 'Play example',
+      speakExampleTitle: 'Click to play German sentence',
+      meaningsTitle: 'Definitions',
+      examplesTitle: 'Examples (click sentence to play audio)',
+      declensionTitle: 'Noun Declension (Deklination)',
+      thCase: 'Case (Kasus)',
+      thSingular: 'Singular',
+      thPlural: 'Plural',
+      caseSub: {
+        nominativ: 'Subject',
+        akkusativ: 'Direct Object',
+        dativ: 'Indirect Object',
+        genitiv: 'Possessive'
+      },
+      conjugationTitle: 'Verb Conjugation (Konjugation)',
+      praeteritumLabel: 'Simple Past (Präteritum)',
+      perfektLabel: 'Present Perfect (Perfekt)',
+      auxChip: (aux) => 'Aux: ' + aux,
+      reviewCounter: (done, rem) => 'Completed ' + done + ' · Remaining ' + rem,
+      reviewEmptyLevelTitle: 'No words in this level yet',
+      reviewEmptyLevelDesc: 'Switch to A1 or select "All Levels" above to start reviewing.',
+      switchToA1Short: 'Switch to A1',
+      reviewDoneCurrent: 'All due cards reviewed!',
+      reviewNoDue: 'No cards due today',
+      reviewUnlearnedDescHtml: (n) =>
+        'There ' +
+        (n === 1 ? 'is' : 'are') +
+        ' <strong>' +
+        n +
+        '</strong> new ' +
+        (n === 1 ? 'word' : 'words') +
+        ' in this scope. Click below to add ' +
+        (n === 1 ? 'it' : 'them') +
+        ' to your SM-2 review queue.',
+      reviewAddUnlearned: (n) =>
+        'Add ' + n + ' New ' + (n === 1 ? 'Word' : 'Words') + ' to Review',
+      backToBrowse: 'Back to Browse',
+      reviewAllDoneTitle: 'All reviews complete for today!',
+      reviewAllDoneDescHtml: (nextDate) =>
+        'Great job! Every word in this scope is scheduled with SM-2.' +
+        (nextDate ? ' Next review date: <strong>' + nextDate + '</strong>.' : ''),
+      flashcardHintNoun: 'Recall the article (der/die/das), plural form, and English meaning',
+      flashcardHintVerb: 'Recall present tense conjugation, Präteritum, Perfekt, and English meaning',
+      flashcardHintOther: 'Recall the part of speech, usage, and English meaning',
+      flashcardSpeakTitle: 'Click to pronounce',
+      flashcardSpeakBtn: 'Pronounce',
+      revealBtn: 'Show Answer',
+      ratingPrompt: 'How well did you recall this word? (SM-2 schedules your next review)',
+      rateAgain: 'Again',
+      rateHard: 'Hard',
+      rateGood: 'Good',
+      rateEasy: 'Easy',
+      toastAgain: 'Reset — will reappear at the end of this session',
+      toastNextReview: (date, days) =>
+        'Next review: ' + date + ' (in ' + days + (days === 1 ? ' day)' : ' days)'),
+      toastAddedStudy: 'Added to today’s review queue',
+      toastRemovedStudy: 'Reset learning progress for this word',
+      toastAddedBatch: (n) =>
+        'Added ' + n + ' new ' + (n === 1 ? 'word' : 'words') + ' to today’s review',
+      toastExported: 'Exported learning progress JSON',
+      toastImportFail: (err) => 'Import failed: ' + err,
+      toastImportOk: (n) =>
+        'Restored ' + n + ' progress ' + (n === 1 ? 'record' : 'records'),
+      toastReadFail: 'Failed to read file. Please try again.',
+      toastLangSwitched: 'Switched to English'
+    }
+  };
+
+  function loadSavedLang() {
+    try {
+      const saved = window.localStorage.getItem(LANG_STORAGE_KEY);
+      return saved === 'en' ? 'en' : 'zh';
+    } catch (_e) {
+      return 'zh';
+    }
+  }
+
+  function saveLang(lang) {
+    try {
+      window.localStorage.setItem(LANG_STORAGE_KEY, lang);
+    } catch (_e) {
+      // ignore storage errors
+    }
+  }
+
   const state = {
+    lang: loadSavedLang(), // 'zh' | 'en'
     vocabByLevel: { a1: [], a2: [], b1: [], b2: [] },
     allWordsMap: {},
     currentLevel: 'a1',
@@ -24,11 +272,24 @@
     activeSpeakEl: null
   };
 
+  function isEn() {
+    return state.lang === 'en';
+  }
+
+  function t() {
+    return I18N[state.lang] || I18N.zh;
+  }
+
   // DOM 缓存
   const els = {
+    brandSubtitle: document.getElementById('brandSubtitle'),
     btnModeBrowse: document.getElementById('btnModeBrowse'),
     btnModeReview: document.getElementById('btnModeReview'),
+    modeBrowseLabel: document.getElementById('modeBrowseLabel'),
+    modeReviewLabel: document.getElementById('modeReviewLabel'),
     dueBadge: document.getElementById('dueBadge'),
+    btnLangZh: document.getElementById('btnLangZh'),
+    btnLangEn: document.getElementById('btnLangEn'),
     btnExport: document.getElementById('btnExport'),
     btnImport: document.getElementById('btnImport'),
     importFileInput: document.getElementById('importFileInput'),
@@ -44,6 +305,7 @@
     detailPane: document.getElementById('detailPane'),
     detailNavBar: document.getElementById('detailNavBar'),
     detailPosition: document.getElementById('detailPosition'),
+    detailNavHint: document.getElementById('detailNavHint'),
     btnPrevWord: document.getElementById('btnPrevWord'),
     btnNextWord: document.getElementById('btnNextWord'),
     detailContent: document.getElementById('detailContent'),
@@ -75,9 +337,16 @@
       .replace(/'/g, '&#39;');
   }
 
+  // 获取用于德语字母表排序与首字母分组的核心词干（忽略前缀 (sich) / sich）
+  function getGermanSortKey(word) {
+    const clean = String(word || '').trim();
+    if (!clean || clean === 'sich') return clean;
+    return clean.replace(/^\(sich\)\s+/i, '').replace(/^sich\s+/i, '');
+  }
+
   // 获取德语单词对应的 A-Z 首字母（ä->A, ö->O, ü->U, ß->S）
   function getGermanInitial(word) {
-    const clean = String(word || '').trim();
+    const clean = getGermanSortKey(word);
     if (!clean) return '#';
     const first = clean.charAt(0).toLowerCase();
     if (first === 'ä') return 'A';
@@ -108,7 +377,11 @@
   }
 
   function sortGermanWords(words) {
-    return words.slice().sort((a, b) => germanCollator.compare(a.word, b.word));
+    return words.slice().sort((a, b) => {
+      const cmp = germanCollator.compare(getGermanSortKey(a.word), getGermanSortKey(b.word));
+      if (cmp !== 0) return cmp;
+      return String(a.word).localeCompare(String(b.word));
+    });
   }
 
   function speakerSvg() {
@@ -128,6 +401,7 @@
     }
 
     window.GermanSpeech.speak(text, {
+      lang: state.lang,
       onStart: () => {
         if (triggerEl) {
           triggerEl.classList.add('speaking');
@@ -150,7 +424,7 @@
     if (wordObj.pos === 'noun' && wordObj.article) {
       return wordObj.article + ' ' + wordObj.word;
     }
-    return wordObj.word;
+    return String(wordObj.word || '').replace(/^\(sich\)\s+/i, 'sich ');
   }
 
   function getPosBadgeClass(wordObj) {
@@ -160,6 +434,177 @@
       return 'pos-n';
     }
     return 'pos-verb';
+  }
+
+  function getLocalizedPosLabel(w) {
+    if (!isEn()) return w.posLabel || w.pos;
+    if (w.pos === 'noun') {
+      const pl = String(w.plural || '');
+      const lbl = String(w.posLabel || '');
+      if (lbl.includes('复数名词') || pl.includes('仅复数') || pl.includes('常用复数')) {
+        return 'Plural Noun';
+      }
+      if (w.gender === 'm') return 'Masculine Noun';
+      if (w.gender === 'f') return 'Feminine Noun';
+      return 'Neuter Noun';
+    }
+    if (w.pos === 'verb') {
+      const reg = String(w.regularity || '') + ' ' + String(w.posLabel || '');
+      if (/Modalverb|情态动词/i.test(reg)) return 'Modal Verb';
+      const sep = /trennbar|可分/i.test(reg) && !/untrennbar|不可分/i.test(reg);
+      const insep = /untrennbar|不可分/i.test(reg);
+      const irreg = /unregelmäßig|不规则/i.test(reg);
+      const mixed = /gemischt|混合/i.test(reg);
+      const refl = /reflexiv|反身/i.test(reg);
+      const parts = [];
+      if (sep) parts.push('Separable');
+      else if (insep) parts.push('Inseparable');
+      if (refl) parts.push('Reflexive');
+      if (mixed) parts.push('Mixed');
+      else if (irreg) parts.push('Irregular');
+      else parts.push('Regular');
+      return 'Verb · ' + parts.join(', ');
+    }
+    const map = {
+      adjective: 'Adjective',
+      adverb: 'Adverb',
+      article: 'Article / Determiner',
+      conjunction: 'Conjunction',
+      interjection: 'Interjection',
+      phrase: 'Phrase',
+      prefix: 'Prefix',
+      preposition: 'Preposition',
+      pronoun: 'Pronoun'
+    };
+    return map[w.pos] || 'Word';
+  }
+
+  function getLocalizedRegularity(w) {
+    const raw = String(w.regularity || '');
+    if (!isEn()) return raw || '动词';
+    if (!raw) return 'Verb';
+    if (/Modalverb|情态动词/i.test(raw)) {
+      return raw.includes('Konjunktiv II') ? 'Modal verb (Konjunktiv II of mögen)' : 'Modal verb (Modalverb)';
+    }
+    const parenMatch = raw.match(/\(([^)]+)\)/);
+    let germanDetail = parenMatch ? parenMatch[1] : '';
+    germanDetail = germanDetail
+      .replace(/，/g, ', ')
+      .replace(/\s*结尾/g, '')
+      .trim();
+    const tags = [];
+    if (/unpersönlich|无人称/i.test(raw)) tags.push('Impersonal');
+    if (/reflexiv|反身/i.test(raw)) tags.push('Reflexive');
+    if (/untrennbar|不可分/i.test(raw)) tags.push('Inseparable');
+    else if (/trennbar|可分/i.test(raw)) tags.push('Separable');
+    if (/gemischt|混合/i.test(raw)) tags.push('Mixed');
+    else if (/unregelmäßig|不规则/i.test(raw)) tags.push('Irregular');
+    else if (/regelmäßig|规则/i.test(raw)) tags.push('Regular');
+    if (/Hilfsverb|助动词/i.test(raw)) tags.push('Auxiliary');
+    const base = (tags.length > 0 ? tags.join(', ') : 'Verb') + (tags.includes('Verb') ? '' : ' verb');
+    return germanDetail ? base + ' (' + germanDetail + ')' : base;
+  }
+
+  function localizeGrammarNote(text) {
+    const raw = String(text || '');
+    if (!isEn() || !CJK_REGEX.test(raw)) return raw;
+    return raw
+      .replace(/\(通常无复数\)/g, '(uncountable)')
+      .replace(/\(不可数\)/g, '(uncountable)')
+      .replace(/\(无复数\)/g, '(no plural)')
+      .replace(/\(通常仅用单数\)/g, '(usually singular)')
+      .replace(/\(少用\)/g, '(rare)')
+      .replace(/\(此义仅复数\)/g, '(plural only)')
+      .replace(/\(仅复数\)/g, '(plural only)')
+      .replace(/\(常用复数\)/g, '(usually plural)')
+      .replace(/\(无单数\)/g, '(no singular)')
+      .replace(/\(通常无冠词\)/g, '(usually no article)')
+      .replace(/\(定冠词后\)/g, '(after def. article)')
+      .replace(/\(无冠词\)/g, '(no article)')
+      .replace(/\(数词后保持单数 Grad\)/g, '(singular after numbers: Grad)')
+      .replace(/\(数词后用 Grad\)/g, '(singular after numbers: Grad)')
+      .replace(/\(楼层\)/g, '(floors)')
+      .replace(/\(手杖\)/g, '(sticks)')
+      .replace(/\(单词\)/g, '(words)')
+      .replace(/\(话语\)/g, '(utterances)')
+      .replace(/\(借用 wollen\)/g, '(uses wollen)')
+      .replace(/\(仅用 es regnet\)/g, '(impersonal: es regnet)')
+      .replace(/\(表“搬出”时用 ist ausgezogen\)/g, "(with sein for 'move out': ist ausgezogen)")
+      .replace(/\(带动词原形时用 hat \.\.\. dürfen\)/g, '(with infinitive: hat ... dürfen)')
+      .replace(/\(及物时亦可用 hat gefahren\)/g, '(transitive: hat gefahren)');
+  }
+
+  function getLocalizedExampleTag(ex, w, idx) {
+    const rawTag = String((ex && ex.tag) || '').trim();
+    if (!isEn()) {
+      return rawTag || (w.pos !== 'noun' && w.pos !== 'verb' ? w.posLabel || '例句' : '例句');
+    }
+    if (!rawTag) return 'Example ' + (idx + 1);
+    if (!CJK_REGEX.test(rawTag)) return rawTag;
+    if (/Dativ/i.test(rawTag)) return 'Usage (+ Dativ)';
+    if (/Akkusativ/i.test(rawTag)) return 'Usage (+ Akkusativ)';
+    if (/Genitiv/i.test(rawTag)) return 'Usage (+ Genitiv)';
+    if (/Nominativ/i.test(rawTag)) return 'Usage (Nominativ)';
+    if (/比较级/.test(rawTag)) return 'Comparative';
+    if (/最高级/.test(rawTag)) return 'Superlative';
+    return 'Example ' + (idx + 1);
+  }
+
+  function applyStaticTranslations() {
+    const dict = t();
+    document.documentElement.lang = dict.htmlLang;
+    document.title = dict.pageTitle;
+
+    if (els.brandSubtitle) els.brandSubtitle.textContent = dict.brandSubtitle;
+    if (els.modeBrowseLabel) els.modeBrowseLabel.textContent = dict.modeBrowse;
+    if (els.modeReviewLabel) els.modeReviewLabel.textContent = dict.modeReview;
+    if (els.btnExport) {
+      els.btnExport.textContent = dict.exportBtn;
+      els.btnExport.title = dict.exportTitle;
+    }
+    if (els.btnImport) {
+      els.btnImport.textContent = dict.importBtn;
+      els.btnImport.title = dict.importTitle;
+    }
+    if (els.searchInput) els.searchInput.placeholder = dict.searchPlaceholder;
+    if (els.btnClearSearch) els.btnClearSearch.setAttribute('aria-label', dict.clearSearchLabel);
+    if (els.btnMobileBack) els.btnMobileBack.textContent = dict.mobileBack;
+    if (els.detailNavHint) els.detailNavHint.textContent = dict.navHint;
+    if (els.btnPrevWord) {
+      els.btnPrevWord.textContent = dict.prevWord;
+      els.btnPrevWord.title = dict.prevWordTitle;
+    }
+    if (els.btnNextWord) {
+      els.btnNextWord.textContent = dict.nextWord;
+      els.btnNextWord.title = dict.nextWordTitle;
+    }
+    if (els.scopeAll) els.scopeAll.textContent = dict.scopeAll;
+
+    if (els.btnLangZh && els.btnLangEn) {
+      const zhActive = state.lang === 'zh';
+      els.btnLangZh.classList.toggle('active', zhActive);
+      els.btnLangZh.setAttribute('aria-pressed', zhActive ? 'true' : 'false');
+      els.btnLangEn.classList.toggle('active', !zhActive);
+      els.btnLangEn.setAttribute('aria-pressed', !zhActive ? 'true' : 'false');
+    }
+  }
+
+  function setLanguage(lang, silent) {
+    const nextLang = lang === 'en' ? 'en' : 'zh';
+    if (state.lang === nextLang && !silent) return;
+    state.lang = nextLang;
+    saveLang(nextLang);
+    applyStaticTranslations();
+    updateHeaderStats();
+    renderAlphaBar();
+    if (state.currentMode === 'review') {
+      renderReviewView();
+    } else {
+      renderWordList();
+    }
+    if (!silent) {
+      showToast(t().toastLangSwitched);
+    }
   }
 
   function formatArticleHtml(wordObj) {
@@ -268,18 +713,16 @@
     const learnedInLevel = levelWords.filter((w) => Boolean(progress[w.id])).length;
     const dueInLevel = levelWords.filter((w) => progress[w.id] && window.SM2Store.isDue(progress[w.id], today)).length;
     const levelLabel = state.currentLevel.toUpperCase();
+    const dict = t();
 
-    els.progressSummary.textContent =
-      levelLabel +
-      '：已学 ' +
-      learnedInLevel +
-      ' / ' +
-      levelWords.length +
-      ' 词 · 今日待复习 ' +
-      dueInLevel +
-      ' 词';
+    els.progressSummary.textContent = dict.progressSummary(
+      levelLabel,
+      learnedInLevel,
+      levelWords.length,
+      dueInLevel
+    );
 
-    els.scopeLevel.textContent = '当前等级 (' + levelLabel + ')';
+    els.scopeLevel.textContent = dict.scopeLevel(levelLabel);
   }
 
   // ==================== 词库浏览渲染 ====================
@@ -324,7 +767,9 @@
     let html =
       '<button type="button" class="alpha-btn ' +
       (state.activeLetter === 'ALL' ? 'active' : '') +
-      '" data-letter="ALL">全部</button>';
+      '" data-letter="ALL">' +
+      escapeHtml(t().alphaAll) +
+      '</button>';
 
     ALPHABET.forEach((letter) => {
       const hasLetter = available.has(letter);
@@ -348,31 +793,31 @@
     const allInLevel = state.vocabByLevel[state.currentLevel] || [];
     const filtered = getFilteredWords();
     const progress = window.SM2Store.loadAll();
+    const dict = t();
+    const enMode = isEn();
 
     els.listMeta.innerHTML =
-      '<span>按德语字母表排序（ä/ö/ü/ß）</span><span>共 ' + filtered.length + ' 词</span>';
+      '<span>' +
+      escapeHtml(dict.listSortLabel) +
+      '</span><span>' +
+      escapeHtml(dict.listCount(filtered.length)) +
+      '</span>';
 
     if (allInLevel.length === 0) {
+      const lvUpper = state.currentLevel.toUpperCase();
       els.wordList.innerHTML =
         '<div style="padding:28px 14px;text-align:center;color:var(--text-muted);font-size:14px;">' +
-        '当前 <strong>' +
-        state.currentLevel.toUpperCase() +
-        '</strong> 词库暂未添加单词。<br/>后续可直接向 <code>data/' +
-        state.currentLevel +
-        '.json</code> 填入词条。</div>';
-      renderEmptyDetail(
-        state.currentLevel.toUpperCase() + ' 词库待扩充',
-        '目前测试词存放在 A1 词库中，您可以切换到 A1 体验全部功能，或后续按相同 JSON 格式扩充此等级词库。',
-        true
-      );
+        dict.emptyLevelListHtml(lvUpper, state.currentLevel) +
+        '</div>';
+      renderEmptyDetail(dict.emptyLevelTitle(lvUpper), dict.emptyLevelDesc, true);
       return;
     }
 
     if (filtered.length === 0) {
       els.wordList.innerHTML =
-        '<div style="padding:28px 14px;text-align:center;color:var(--text-muted);font-size:14px;">未找到与“' +
-        escapeHtml(state.searchQuery) +
-        '”匹配的单词。</div>';
+        '<div style="padding:28px 14px;text-align:center;color:var(--text-muted);font-size:14px;">' +
+        escapeHtml(dict.noSearchResult(state.searchQuery)) +
+        '</div>';
       updateDetailNavBar();
       return;
     }
@@ -399,9 +844,11 @@
       }
 
       const rec = progress[w.id];
-      const status = window.SM2Store.getStatusInfo(rec);
+      const status = window.SM2Store.getStatusInfo(rec, state.lang);
       const selectedClass = w.id === state.selectedWordId ? ' selected' : '';
-      const meaningPreview = (w.meanings || []).map((m) => m.zh).join('；');
+      const meaningPreview = enMode
+        ? (w.meanings || []).map((m) => m.en).filter(Boolean).join('; ')
+        : (w.meanings || []).map((m) => m.zh).filter(Boolean).join('；');
 
       html +=
         '<button type="button" class="word-item' +
@@ -433,40 +880,51 @@
   }
 
   function buildGrammarSectionHtml(w) {
+    const dict = t();
     if (w.pos === 'noun' && w.declension) {
       const d = w.declension;
       const rows = [
-        { key: 'nominativ', name: 'Nominativ', sub: '第一格 · 主格' },
-        { key: 'akkusativ', name: 'Akkusativ', sub: '第四格 · 宾格' },
-        { key: 'dativ', name: 'Dativ', sub: '第三格 · 与格' },
-        { key: 'genitiv', name: 'Genitiv', sub: '第二格 · 属格' }
+        { key: 'nominativ', name: 'Nominativ', sub: dict.caseSub.nominativ },
+        { key: 'akkusativ', name: 'Akkusativ', sub: dict.caseSub.akkusativ },
+        { key: 'dativ', name: 'Dativ', sub: dict.caseSub.dativ },
+        { key: 'genitiv', name: 'Genitiv', sub: dict.caseSub.genitiv }
       ];
 
       let tbody = '';
       rows.forEach((r) => {
         const pair = d[r.key] || { singular: '-', plural: '-' };
+        const sgText = localizeGrammarNote(pair.singular);
+        const plText = localizeGrammarNote(pair.plural);
         tbody +=
           '<tr>' +
           '<td><span class="case-name">' +
           r.name +
           '</span><span class="case-sub">' +
-          r.sub +
+          escapeHtml(r.sub) +
           '</span></td>' +
           '<td>' +
-          highlightDeclensionCell(pair.singular, w.gender) +
+          highlightDeclensionCell(sgText, w.gender) +
           '</td>' +
           '<td>' +
-          highlightDeclensionCell(pair.plural, 'pl') +
+          highlightDeclensionCell(plText, 'pl') +
           '</td>' +
           '</tr>';
       });
 
       return (
         '<div class="section-block">' +
-        '<h3>名词四格变格表 (Deklination)</h3>' +
+        '<h3>' +
+        escapeHtml(dict.declensionTitle) +
+        '</h3>' +
         '<div class="table-wrap">' +
         '<table class="grammar-table">' +
-        '<thead><tr><th>格 (Kasus)</th><th>单数 (Singular)</th><th>复数 (Plural)</th></tr></thead>' +
+        '<thead><tr><th>' +
+        escapeHtml(dict.thCase) +
+        '</th><th>' +
+        escapeHtml(dict.thSingular) +
+        '</th><th>' +
+        escapeHtml(dict.thPlural) +
+        '</th></tr></thead>' +
         '<tbody>' +
         tbody +
         '</tbody></table></div></div>'
@@ -477,12 +935,12 @@
       const c = w.conjugation;
       const p = c.present || {};
       const persons = [
-        { label: 'ich', value: p.ich },
-        { label: 'wir', value: p.wir },
-        { label: 'du', value: p.du },
-        { label: 'ihr', value: p.ihr },
-        { label: 'er / sie / es', value: p.er_sie_es },
-        { label: 'sie / Sie', value: p.sie_Sie }
+        { label: 'ich', value: localizeGrammarNote(p.ich || '-') },
+        { label: 'wir', value: localizeGrammarNote(p.wir || '-') },
+        { label: 'du', value: localizeGrammarNote(p.du || '-') },
+        { label: 'ihr', value: localizeGrammarNote(p.ihr || '-') },
+        { label: 'er / sie / es', value: localizeGrammarNote(p.er_sie_es || '-') },
+        { label: 'sie / Sie', value: localizeGrammarNote(p.sie_Sie || '-') }
       ];
 
       let grid = '';
@@ -493,27 +951,33 @@
           item.label +
           '</span>' +
           '<span class="conj-form">' +
-          escapeHtml(item.value || '-') +
+          escapeHtml(item.value) +
           '</span>' +
           '</div>';
       });
 
       return (
         '<div class="section-block">' +
-        '<h3>动词变位表 (Konjugation)</h3>' +
+        '<h3>' +
+        escapeHtml(dict.conjugationTitle) +
+        '</h3>' +
         '<div class="verb-tenses">' +
         '<div class="tense-card">' +
-        '<div class="tense-label">过去式 (Präteritum)</div>' +
+        '<div class="tense-label">' +
+        escapeHtml(dict.praeteritumLabel) +
+        '</div>' +
         '<div class="tense-value">' +
-        escapeHtml(c.praeteritum || '-') +
+        escapeHtml(localizeGrammarNote(c.praeteritum || '-')) +
         '</div>' +
         '</div>' +
         '<div class="tense-card">' +
-        '<div class="tense-label">现在完成时 (Perfekt)<span class="aux-chip">助动词：' +
-        escapeHtml(w.auxiliary || 'haben') +
+        '<div class="tense-label">' +
+        escapeHtml(dict.perfektLabel) +
+        '<span class="aux-chip">' +
+        escapeHtml(dict.auxChip(w.auxiliary || 'haben')) +
         '</span></div>' +
         '<div class="tense-value">' +
-        escapeHtml(c.perfekt || '-') +
+        escapeHtml(localizeGrammarNote(c.perfekt || '-')) +
         '</div>' +
         '</div>' +
         '</div>' +
@@ -529,25 +993,37 @@
 
   function buildWordCardHtml(w, options) {
     const opts = options || {};
+    const dict = t();
+    const enMode = isEn();
     const rec = window.SM2Store.getRecord(w.id);
-    const status = window.SM2Store.getStatusInfo(rec);
+    const status = window.SM2Store.getStatusInfo(rec, state.lang);
     const speakTarget = getSpeakWordText(w);
 
     let submetaHtml = '';
     if (w.pos === 'noun') {
+      const pluralRaw = localizeGrammarNote(w.plural || '-');
+      const pluralDisplay = /^[-–—]/.test(pluralRaw.trim()) ? pluralRaw : 'die ' + pluralRaw;
       submetaHtml =
-        '<span>定冠词：<strong>' +
+        '<span>' +
+        escapeHtml(dict.articleLabel) +
+        '<strong>' +
         escapeHtml(w.article || '-') +
         '</strong></span>' +
-        '<span>复数：<strong>die ' +
-        escapeHtml(w.plural || '-') +
+        '<span>' +
+        escapeHtml(dict.pluralLabel) +
+        '<strong>' +
+        escapeHtml(pluralDisplay) +
         '</strong></span>';
     } else if (w.pos === 'verb') {
       submetaHtml =
-        '<span>类型：<strong>' +
-        escapeHtml(w.regularity || '动词') +
+        '<span>' +
+        escapeHtml(dict.verbTypeLabel) +
+        '<strong>' +
+        escapeHtml(getLocalizedRegularity(w)) +
         '</strong></span>' +
-        '<span>完成时助动词：<strong>' +
+        '<span>' +
+        escapeHtml(dict.verbAuxLabel) +
+        '<strong>' +
         escapeHtml(w.auxiliary || 'haben') +
         '</strong></span>';
     }
@@ -558,7 +1034,9 @@
         studyActionHtml =
           '<button type="button" class="primary-btn" data-action="add-study" data-word-id="' +
           escapeHtml(w.id) +
-          '">+ 加入今日复习</button>';
+          '">' +
+          escapeHtml(dict.addStudyBtn) +
+          '</button>';
       } else {
         studyActionHtml =
           '<span class="status-pill status-' +
@@ -568,7 +1046,11 @@
           '</span>' +
           '<button type="button" class="secondary-btn" data-action="remove-study" data-word-id="' +
           escapeHtml(w.id) +
-          '" title="重置该词的记忆进度">重置</button>';
+          '" title="' +
+          escapeHtml(dict.resetTitle) +
+          '">' +
+          escapeHtml(dict.resetBtn) +
+          '</button>';
       }
     }
 
@@ -580,28 +1062,32 @@
         (idx + 1) +
         '</span>' +
         '<div>' +
-        '<div class="meaning-zh">' +
-        escapeHtml(m.zh) +
-        '</div>' +
-        '<div class="meaning-en">' +
-        escapeHtml(m.en) +
-        '</div>' +
+        (enMode
+          ? '<div class="meaning-en meaning-en-primary">' + escapeHtml(m.en) + '</div>'
+          : '<div class="meaning-zh">' +
+            escapeHtml(m.zh) +
+            '</div><div class="meaning-en">' +
+            escapeHtml(m.en) +
+            '</div>') +
         '</div>' +
         '</li>';
     });
 
     let examplesHtml = '';
-    (w.examples || []).forEach((ex) => {
+    (w.examples || []).forEach((ex, idx) => {
       const speakSentence = getCleanExampleText(ex);
-      const tagLabel =
-        ex.tag || (w.pos !== 'noun' && w.pos !== 'verb' ? w.posLabel || '例句' : '例句');
-      const tagClass = getExampleTagClass(tagLabel);
+      const tagLabel = getLocalizedExampleTag(ex, w, idx);
+      const tagClass = getExampleTagClass(ex.tag || tagLabel);
 
       examplesHtml +=
         '<div class="example-item">' +
         '<button type="button" class="speak-icon-btn" data-speak="' +
         escapeHtml(speakSentence) +
-        '" title="朗读例句" aria-label="朗读例句">' +
+        '" title="' +
+        escapeHtml(dict.speakExampleBtnTitle) +
+        '" aria-label="' +
+        escapeHtml(dict.speakExampleBtnTitle) +
+        '">' +
         speakerSvg() +
         '</button>' +
         '<div class="example-body">' +
@@ -613,21 +1099,25 @@
         '</span>' +
         '<span class="example-de" data-speak="' +
         escapeHtml(speakSentence) +
-        '" title="点击朗读德语例句">' +
+        '" title="' +
+        escapeHtml(dict.speakExampleTitle) +
+        '">' +
         formatExampleDeHtml(ex) +
         '</span>' +
         '</div>' +
-        '<div class="example-zh">' +
-        escapeHtml(ex.zh) +
-        '</div>' +
-        '<div class="example-en">' +
-        escapeHtml(ex.en) +
-        '</div>' +
+        (enMode
+          ? '<div class="example-en example-en-primary">' + escapeHtml(ex.en) + '</div>'
+          : '<div class="example-zh">' +
+            escapeHtml(ex.zh) +
+            '</div><div class="example-en">' +
+            escapeHtml(ex.en) +
+            '</div>') +
         '</div>' +
         '</div>';
     });
 
-    const noteHtml = w.note
+    const showNote = w.note && (!enMode || !CJK_REGEX.test(w.note));
+    const noteHtml = showNote
       ? '<div class="word-note">💡 ' + escapeHtml(w.note) + '</div>'
       : '';
 
@@ -642,7 +1132,7 @@
       '<span class="pos-badge ' +
       getPosBadgeClass(w) +
       '">' +
-      escapeHtml(w.posLabel || w.pos) +
+      escapeHtml(getLocalizedPosLabel(w)) +
       '</span>' +
       '<span class="level-badge">' +
       escapeHtml(w.level || state.currentLevel.toUpperCase()) +
@@ -656,7 +1146,9 @@
       '<div>' +
       '<button type="button" class="word-headline-btn" data-speak="' +
       escapeHtml(speakTarget) +
-      '" title="点击朗读单词发音">' +
+      '" title="' +
+      escapeHtml(dict.speakWordTitle) +
+      '">' +
       '<span class="word-headline">' +
       formatArticleHtml(w) +
       escapeHtml(w.word) +
@@ -671,19 +1163,25 @@
       escapeHtml(speakTarget) +
       '">' +
       speakerSvg() +
-      '<span>朗读德语</span>' +
+      '<span>' +
+      escapeHtml(dict.speakWordBtn) +
+      '</span>' +
       '</button>' +
       '</div>' +
       noteHtml +
       '<div class="section-block">' +
-      '<h3>完整释义（中英对照）</h3>' +
+      '<h3>' +
+      escapeHtml(dict.meaningsTitle) +
+      '</h3>' +
       '<ol class="meaning-list">' +
       meaningsHtml +
       '</ol>' +
       '</div>' +
       buildGrammarSectionHtml(w) +
       '<div class="section-block">' +
-      '<h3>地道例句（点击德语句子可朗读）</h3>' +
+      '<h3>' +
+      escapeHtml(dict.examplesTitle) +
+      '</h3>' +
       '<div class="example-list">' +
       examplesHtml +
       '</div>' +
@@ -701,7 +1199,7 @@
     }
 
     els.detailNavBar.classList.remove('hidden');
-    els.detailPosition.textContent = '第 ' + (idx + 1) + ' / ' + filtered.length + ' 词';
+    els.detailPosition.textContent = t().detailPosition(idx + 1, filtered.length);
     els.btnPrevWord.disabled = idx <= 0;
     els.btnNextWord.disabled = idx >= filtered.length - 1;
   }
@@ -716,11 +1214,11 @@
 
     const nextIdx = currentIdx + delta;
     if (nextIdx < 0) {
-      showToast('已经是第一个单词了');
+      showToast(t().toastFirstWord);
       return;
     }
     if (nextIdx >= filtered.length) {
-      showToast('已经是最后一个单词了');
+      showToast(t().toastLastWord);
       return;
     }
 
@@ -750,7 +1248,9 @@
       escapeHtml(desc) +
       '</p>' +
       (showBackToA1
-        ? '<div class="empty-actions"><button type="button" class="primary-btn" id="btnJumpA1">切换到 A1 词库</button></div>'
+        ? '<div class="empty-actions"><button type="button" class="primary-btn" id="btnJumpA1">' +
+          escapeHtml(t().jumpA1) +
+          '</button></div>'
         : '') +
       '</div>';
 
@@ -763,7 +1263,8 @@
   function renderDetail() {
     const w = state.allWordsMap[state.selectedWordId];
     if (!w) {
-      renderEmptyDetail('请选择一个单词', '点击左侧列表中的任意德语单词，查看完整释义、变格/变位表和例句。', false);
+      const dict = t();
+      renderEmptyDetail(dict.selectWordTitle, dict.selectWordDesc, false);
       return;
     }
     const transition = state.detailTransition;
@@ -784,9 +1285,9 @@
   }
 
   function renderReviewView() {
+    const dict = t();
     const totalRemaining = state.reviewQueue.length;
-    els.reviewCounter.textContent =
-      '本次已完成 ' + state.reviewDoneCount + ' 词 · 队列剩余 ' + totalRemaining + ' 词';
+    els.reviewCounter.textContent = dict.reviewCounter(state.reviewDoneCount, totalRemaining);
 
     if (totalRemaining === 0) {
       const pool =
@@ -800,10 +1301,16 @@
         els.reviewStage.innerHTML =
           '<div class="empty-card">' +
           '<div class="empty-icon">🗂️</div>' +
-          '<h2>当前等级暂无词条</h2>' +
-          '<p>您可以切换到 A1 词库，或点击上方「全部等级」开始复习。</p>' +
+          '<h2>' +
+          escapeHtml(dict.reviewEmptyLevelTitle) +
+          '</h2>' +
+          '<p>' +
+          escapeHtml(dict.reviewEmptyLevelDesc) +
+          '</p>' +
           '<div class="empty-actions">' +
-          '<button type="button" class="primary-btn" data-review-action="switch-a1">切换到 A1</button>' +
+          '<button type="button" class="primary-btn" data-review-action="switch-a1">' +
+          escapeHtml(dict.switchToA1Short) +
+          '</button>' +
           '</div></div>';
         return;
       }
@@ -813,16 +1320,18 @@
           '<div class="empty-card">' +
           '<div class="empty-icon">✨</div>' +
           '<h2>' +
-          (state.reviewDoneCount > 0 ? '已复习完当前到期单词！' : '今日暂无到期复习词') +
+          escapeHtml(state.reviewDoneCount > 0 ? dict.reviewDoneCurrent : dict.reviewNoDue) +
           '</h2>' +
-          '<p>当前范围内还有 <strong>' +
-          unlearned.length +
-          '</strong> 个未学习的新词。点击下方按钮即可加入 SM-2 记忆曲线队列开始今日练习。</p>' +
+          '<p>' +
+          dict.reviewUnlearnedDescHtml(unlearned.length) +
+          '</p>' +
           '<div class="empty-actions">' +
-          '<button type="button" class="primary-btn" data-review-action="add-unlearned">将这 ' +
-          unlearned.length +
-          ' 个新词加入今日复习</button>' +
-          '<button type="button" class="secondary-btn" data-review-action="go-browse">返回词库浏览</button>' +
+          '<button type="button" class="primary-btn" data-review-action="add-unlearned">' +
+          escapeHtml(dict.reviewAddUnlearned(unlearned.length)) +
+          '</button>' +
+          '<button type="button" class="secondary-btn" data-review-action="go-browse">' +
+          escapeHtml(dict.backToBrowse) +
+          '</button>' +
           '</div></div>';
         return;
       }
@@ -837,12 +1346,16 @@
       els.reviewStage.innerHTML =
         '<div class="empty-card">' +
         '<div class="empty-icon">🎉</div>' +
-        '<h2>今日复习全部完成！</h2>' +
-        '<p>太棒了！当前范围内的所有单词都已按 SM-2 记忆曲线排期。' +
-        (nextDate ? '下一次复习日期为 <strong>' + escapeHtml(nextDate) + '</strong>。' : '') +
+        '<h2>' +
+        escapeHtml(dict.reviewAllDoneTitle) +
+        '</h2>' +
+        '<p>' +
+        dict.reviewAllDoneDescHtml(nextDate ? escapeHtml(nextDate) : '') +
         '</p>' +
         '<div class="empty-actions">' +
-        '<button type="button" class="primary-btn" data-review-action="go-browse">返回词库浏览</button>' +
+        '<button type="button" class="primary-btn" data-review-action="go-browse">' +
+        escapeHtml(dict.backToBrowse) +
+        '</button>' +
         '</div></div>';
       return;
     }
@@ -850,10 +1363,25 @@
     const currentWord = state.reviewQueue[0];
 
     if (!state.reviewRevealed) {
-      const hintText =
+      let hintText = dict.flashcardHintOther;
+      if (currentWord.pos === 'noun') {
+        hintText = dict.flashcardHintNoun;
+      } else if (currentWord.pos === 'verb') {
+        hintText = dict.flashcardHintVerb;
+      }
+
+      const posChip =
         currentWord.pos === 'noun'
-          ? '请回忆该名词的定冠词（der/die/das）、复数形式及中英文释义'
-          : '请回忆该动词的现在时变位、过去式/完成时及中英文释义';
+          ? isEn()
+            ? 'Noun (Nomen)'
+            : '名词 (Nomen)'
+          : currentWord.pos === 'verb'
+            ? isEn()
+              ? 'Verb'
+              : '动词 (Verb)'
+            : getLocalizedPosLabel(currentWord);
+
+      const speakFront = String(currentWord.word || '').replace(/^\(sich\)\s+/i, 'sich ');
 
       els.reviewStage.innerHTML =
         '<div class="flashcard-front">' +
@@ -862,45 +1390,61 @@
         escapeHtml(currentWord.level || state.currentLevel.toUpperCase()) +
         '</span>' +
         '<span class="level-badge">' +
-        (currentWord.pos === 'noun' ? '名词 (Nomen)' : '动词 (Verb)') +
+        escapeHtml(posChip) +
         '</span>' +
         '</div>' +
         '<div class="flashcard-word" data-speak="' +
-        escapeHtml(currentWord.word) +
-        '" title="点击朗读单词">' +
+        escapeHtml(speakFront) +
+        '" title="' +
+        escapeHtml(dict.flashcardSpeakTitle) +
+        '">' +
         escapeHtml(currentWord.word) +
         '</div>' +
         (currentWord.ipa ? '<div class="word-ipa">' + escapeHtml(currentWord.ipa) + '</div>' : '') +
         '<button type="button" class="speak-btn" data-speak="' +
-        escapeHtml(currentWord.word) +
+        escapeHtml(speakFront) +
         '">' +
         speakerSvg() +
-        '<span>朗读单词</span>' +
+        '<span>' +
+        escapeHtml(dict.flashcardSpeakBtn) +
+        '</span>' +
         '</button>' +
         '<div class="flashcard-hint">' +
-        hintText +
+        escapeHtml(hintText) +
         '</div>' +
-        '<button type="button" class="reveal-btn" id="btnRevealAnswer">显示答案</button>' +
+        '<button type="button" class="reveal-btn" id="btnRevealAnswer">' +
+        escapeHtml(dict.revealBtn) +
+        '</button>' +
         '</div>';
       return;
     }
 
-    const previews = window.SM2Store.previewIntervals(currentWord.id);
+    const previews = window.SM2Store.previewIntervals(currentWord.id, state.lang);
     els.reviewStage.innerHTML =
       buildWordCardHtml(currentWord, { hideStudyControls: true }) +
       '<div class="rating-bar">' +
-      '<div class="rating-prompt">请根据刚才的回忆情况选择掌握度（SM-2 算法将自动计算下次复习时间）</div>' +
+      '<div class="rating-prompt">' +
+      escapeHtml(dict.ratingPrompt) +
+      '</div>' +
       '<div class="rating-grid">' +
-      '<button type="button" class="rate-btn rate-again" data-rate="again"><strong>重来</strong><span>' +
+      '<button type="button" class="rate-btn rate-again" data-rate="again"><strong>' +
+      escapeHtml(dict.rateAgain) +
+      '</strong><span>' +
       escapeHtml(previews.again) +
       '</span></button>' +
-      '<button type="button" class="rate-btn rate-hard" data-rate="hard"><strong>困难</strong><span>' +
+      '<button type="button" class="rate-btn rate-hard" data-rate="hard"><strong>' +
+      escapeHtml(dict.rateHard) +
+      '</strong><span>' +
       escapeHtml(previews.hard) +
       '</span></button>' +
-      '<button type="button" class="rate-btn rate-good" data-rate="good"><strong>良好</strong><span>' +
+      '<button type="button" class="rate-btn rate-good" data-rate="good"><strong>' +
+      escapeHtml(dict.rateGood) +
+      '</strong><span>' +
       escapeHtml(previews.good) +
       '</span></button>' +
-      '<button type="button" class="rate-btn rate-easy" data-rate="easy"><strong>简单</strong><span>' +
+      '<button type="button" class="rate-btn rate-easy" data-rate="easy"><strong>' +
+      escapeHtml(dict.rateEasy) +
+      '</strong><span>' +
       escapeHtml(previews.easy) +
       '</span></button>' +
       '</div>' +
@@ -915,10 +1459,10 @@
     if (rating === 'again') {
       // 重来：放回本次队列末尾继续巩固
       state.reviewQueue.push(currentWord);
-      showToast('已重置，将在本次复习末尾再次出现');
+      showToast(t().toastAgain);
     } else {
       state.reviewDoneCount += 1;
-      showToast('下次复习：' + updated.nextReviewDate + '（' + updated.interval + ' 天后）');
+      showToast(t().toastNextReview(updated.nextReviewDate, updated.interval));
     }
 
     state.reviewRevealed = false;
@@ -978,6 +1522,13 @@
   function bindEvents() {
     els.btnModeBrowse.addEventListener('click', () => switchMode('browse'));
     els.btnModeReview.addEventListener('click', () => switchMode('review'));
+
+    if (els.btnLangZh) {
+      els.btnLangZh.addEventListener('click', () => setLanguage('zh'));
+    }
+    if (els.btnLangEn) {
+      els.btnLangEn.addEventListener('click', () => setLanguage('en'));
+    }
 
     els.levelTabs.forEach((tab) => {
       tab.addEventListener('click', () => switchLevel(tab.dataset.level));
@@ -1144,12 +1695,12 @@
           window.SM2Store.addWordToStudy(wordId);
           updateHeaderStats();
           renderWordList();
-          showToast('已加入今日复习队列');
+          showToast(t().toastAddedStudy);
         } else if (action === 'remove-study' && wordId) {
           window.SM2Store.removeWordFromStudy(wordId);
           updateHeaderStats();
           renderWordList();
-          showToast('已重置该单词的学习记录');
+          showToast(t().toastRemovedStudy);
         }
         return;
       }
@@ -1182,7 +1733,7 @@
           updateHeaderStats();
           rebuildReviewQueue();
           renderReviewView();
-          showToast('已将 ' + added + ' 个新词加入今日复习');
+          showToast(t().toastAddedBatch(added));
         }
       }
     });
@@ -1248,7 +1799,7 @@
       a.click();
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      showToast('已导出学习进度 JSON 文件');
+      showToast(t().toastExported);
     });
 
     // 导入恢复学习进度 JSON
@@ -1263,9 +1814,9 @@
 
       const reader = new FileReader();
       reader.onload = () => {
-        const result = window.SM2Store.importJSON(String(reader.result || ''));
+        const result = window.SM2Store.importJSON(String(reader.result || ''), state.lang);
         if (!result.ok) {
-          showToast('导入失败：' + result.error);
+          showToast(t().toastImportFail(result.error));
           return;
         }
         updateHeaderStats();
@@ -1275,10 +1826,10 @@
         } else {
           renderWordList();
         }
-        showToast('已成功恢复 ' + result.count + ' 条学习进度');
+        showToast(t().toastImportOk(result.count));
       };
       reader.onerror = () => {
-        showToast('读取文件失败，请重试');
+        showToast(t().toastReadFail);
       };
       reader.readAsText(file, 'utf-8');
     });
@@ -1310,6 +1861,10 @@
   }
 
   async function init() {
+    applyStaticTranslations();
+    if (els.progressSummary) {
+      els.progressSummary.textContent = t().loadingVocab;
+    }
     bindEvents();
     registerServiceWorker();
 
