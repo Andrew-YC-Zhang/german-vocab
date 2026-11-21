@@ -1,9 +1,13 @@
 (function (global) {
   'use strict';
 
-  const STORAGE_KEY = 'deutschwort_progress_v1';
+  const GUEST_STORAGE_KEY = 'deutschwort_progress_v1';
+  const CLOUD_CACHE_KEY = 'deutschwort_cloud_cache_v1';
   const MIN_EASE = 1.3;
   const DEFAULT_EASE = 2.5;
+
+  let activeStorageKey = GUEST_STORAGE_KEY;
+  const changeListeners = [];
 
   function pad2(n) {
     return n < 10 ? '0' + n : String(n);
@@ -29,6 +33,10 @@
     return Math.round((utcB - utcA) / 86400000);
   }
 
+  function isValidDateStr(str) {
+    return typeof str === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(str);
+  }
+
   function createDefaultRecord(wordId, todayStr) {
     const today = todayStr || getTodayStr();
     return {
@@ -40,13 +48,58 @@
       lastReviewDate: null,
       lapses: 0,
       totalReviews: 0,
-      addedAt: today
+      addedAt: today,
+      updatedAt: Date.now()
     };
   }
 
-  function loadAll() {
+  function sanitizeRecord(wordId, item, fallbackToday) {
+    if (!item || typeof item !== 'object') return null;
+    if (!isValidDateStr(item.nextReviewDate)) return null;
+    const today = fallbackToday || getTodayStr();
+    const rawUpdated = Number(item.updatedAt);
+    return {
+      wordId: wordId,
+      repetitions: Math.max(0, Number(item.repetitions) || 0),
+      interval: Math.max(0, Number(item.interval) || 0),
+      easeFactor: Math.max(MIN_EASE, Number(item.easeFactor) || DEFAULT_EASE),
+      nextReviewDate: item.nextReviewDate,
+      lastReviewDate: isValidDateStr(item.lastReviewDate) ? item.lastReviewDate : null,
+      lapses: Math.max(0, Number(item.lapses) || 0),
+      totalReviews: Math.max(0, Number(item.totalReviews) || 0),
+      addedAt: isValidDateStr(item.addedAt) ? item.addedAt : today,
+      updatedAt: Number.isFinite(rawUpdated) && rawUpdated > 0 ? rawUpdated : 0
+    };
+  }
+
+  function sanitizeProgressMap(rawProgress) {
+    const cleaned = {};
+    if (!rawProgress || typeof rawProgress !== 'object' || Array.isArray(rawProgress)) {
+      return cleaned;
+    }
+    const today = getTodayStr();
+    Object.keys(rawProgress).forEach((wordId) => {
+      const rec = sanitizeRecord(wordId, rawProgress[wordId], today);
+      if (rec) {
+        cleaned[wordId] = rec;
+      }
+    });
+    return cleaned;
+  }
+
+  function setStorageKey(key) {
+    if (key === GUEST_STORAGE_KEY || key === CLOUD_CACHE_KEY) {
+      activeStorageKey = key;
+    }
+  }
+
+  function getStorageKey() {
+    return activeStorageKey;
+  }
+
+  function loadFromKey(key) {
     try {
-      const raw = global.localStorage.getItem(STORAGE_KEY);
+      const raw = global.localStorage.getItem(key);
       if (!raw) return {};
       const parsed = JSON.parse(raw);
       return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
@@ -55,13 +108,58 @@
     }
   }
 
-  function saveAll(progressMap) {
+  function saveToKey(key, progressMap) {
     try {
-      global.localStorage.setItem(STORAGE_KEY, JSON.stringify(progressMap));
+      global.localStorage.setItem(key, JSON.stringify(progressMap || {}));
       return true;
     } catch (e) {
       return false;
     }
+  }
+
+  function clearKey(key) {
+    try {
+      global.localStorage.removeItem(key);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function notifyChange(progressMap, reason) {
+    changeListeners.forEach((fn) => {
+      try {
+        fn(progressMap, reason);
+      } catch (_err) {
+        // ignore listener errors
+      }
+    });
+  }
+
+  function onChange(listener) {
+    if (typeof listener === 'function') {
+      changeListeners.push(listener);
+    }
+  }
+
+  function loadAll() {
+    return loadFromKey(activeStorageKey);
+  }
+
+  function saveAll(progressMap, options) {
+    const opts = options || {};
+    const ok = saveToKey(activeStorageKey, progressMap);
+    if (ok && !opts.silent) {
+      notifyChange(progressMap, opts.reason || 'save');
+    }
+    return ok;
+  }
+
+  function replaceAll(rawProgress, options) {
+    const cleaned = sanitizeProgressMap(rawProgress);
+    const opts = Object.assign({ silent: true, reason: 'replace' }, options || {});
+    saveAll(cleaned, opts);
+    return cleaned;
   }
 
   function getRecord(wordId) {
@@ -73,7 +171,7 @@
     const all = loadAll();
     if (!all[wordId]) {
       all[wordId] = createDefaultRecord(wordId);
-      saveAll(all);
+      saveAll(all, { reason: 'add-study' });
     }
     return all[wordId];
   }
@@ -89,7 +187,7 @@
       }
     });
     if (added > 0) {
-      saveAll(all);
+      saveAll(all, { reason: 'add-batch' });
     }
     return added;
   }
@@ -98,7 +196,7 @@
     const all = loadAll();
     if (all[wordId]) {
       delete all[wordId];
-      saveAll(all);
+      saveAll(all, { reason: 'remove-study' });
       return true;
     }
     return false;
@@ -171,7 +269,8 @@
       lastReviewDate: today,
       lapses: lapses,
       totalReviews: totalReviews,
-      addedAt: base.addedAt || today
+      addedAt: base.addedAt || today,
+      updatedAt: Date.now()
     };
   }
 
@@ -181,8 +280,70 @@
     const updated = calculateNext(current, rating);
     updated.wordId = wordId;
     all[wordId] = updated;
-    saveAll(all);
+    saveAll(all, { reason: 'review' });
     return updated;
+  }
+
+  function pickNewerRecord(recA, recB) {
+    if (!recA) return recB;
+    if (!recB) return recA;
+
+    const uA = Number(recA.updatedAt) || 0;
+    const uB = Number(recB.updatedAt) || 0;
+    if (uA !== uB) return uA > uB ? recA : recB;
+
+    const lastA = String(recA.lastReviewDate || '');
+    const lastB = String(recB.lastReviewDate || '');
+    if (lastA !== lastB) return lastA > lastB ? recA : recB;
+
+    const revA = Number(recA.totalReviews) || 0;
+    const revB = Number(recB.totalReviews) || 0;
+    if (revA !== revB) return revA > revB ? recA : recB;
+
+    const nextA = String(recA.nextReviewDate || '');
+    const nextB = String(recB.nextReviewDate || '');
+    if (nextA !== nextB) return nextA > nextB ? recA : recB;
+
+    const addA = String(recA.addedAt || '');
+    const addB = String(recB.addedAt || '');
+    return addA >= addB ? recA : recB;
+  }
+
+  function mergeProgress(localMap, cloudMap) {
+    const cleanLocal = sanitizeProgressMap(localMap);
+    const cleanCloud = sanitizeProgressMap(cloudMap);
+    const merged = {};
+    const allKeys = new Set(Object.keys(cleanLocal).concat(Object.keys(cleanCloud)));
+    allKeys.forEach((wordId) => {
+      merged[wordId] = Object.assign({}, pickNewerRecord(cleanLocal[wordId], cleanCloud[wordId]));
+    });
+    return merged;
+  }
+
+  function areProgressMapsEqual(mapA, mapB) {
+    const a = sanitizeProgressMap(mapA);
+    const b = sanitizeProgressMap(mapB);
+    const keysA = Object.keys(a);
+    const keysB = Object.keys(b);
+    if (keysA.length !== keysB.length) return false;
+    for (let i = 0; i < keysA.length; i++) {
+      const k = keysA[i];
+      const ra = a[k];
+      const rb = b[k];
+      if (!rb) return false;
+      if (
+        ra.repetitions !== rb.repetitions ||
+        ra.interval !== rb.interval ||
+        ra.easeFactor !== rb.easeFactor ||
+        ra.nextReviewDate !== rb.nextReviewDate ||
+        ra.lastReviewDate !== rb.lastReviewDate ||
+        ra.lapses !== rb.lapses ||
+        ra.totalReviews !== rb.totalReviews
+      ) {
+        return false;
+      }
+    }
+    return true;
   }
 
   function formatIntervalLabel(days, lang) {
@@ -277,10 +438,6 @@
     return JSON.stringify(payload, null, 2);
   }
 
-  function isValidDateStr(str) {
-    return typeof str === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(str);
-  }
-
   function importJSON(jsonText, lang) {
     const isEn = lang === 'en';
     let parsed;
@@ -305,28 +462,14 @@
       };
     }
 
-    const today = getTodayStr();
-    const cleaned = {};
-    let count = 0;
-
-    Object.keys(rawProgress).forEach((wordId) => {
-      const item = rawProgress[wordId];
-      if (!item || typeof item !== 'object') return;
-      if (!isValidDateStr(item.nextReviewDate)) return;
-
-      cleaned[wordId] = {
-        wordId: wordId,
-        repetitions: Math.max(0, Number(item.repetitions) || 0),
-        interval: Math.max(0, Number(item.interval) || 0),
-        easeFactor: Math.max(MIN_EASE, Number(item.easeFactor) || DEFAULT_EASE),
-        nextReviewDate: item.nextReviewDate,
-        lastReviewDate: isValidDateStr(item.lastReviewDate) ? item.lastReviewDate : null,
-        lapses: Math.max(0, Number(item.lapses) || 0),
-        totalReviews: Math.max(0, Number(item.totalReviews) || 0),
-        addedAt: isValidDateStr(item.addedAt) ? item.addedAt : today
-      };
-      count += 1;
+    const cleaned = sanitizeProgressMap(rawProgress);
+    const now = Date.now();
+    Object.keys(cleaned).forEach((k) => {
+      if (!cleaned[k].updatedAt) {
+        cleaned[k].updatedAt = now;
+      }
     });
+    const count = Object.keys(cleaned).length;
 
     if (count === 0 && Object.keys(rawProgress).length > 0) {
       return {
@@ -337,7 +480,7 @@
       };
     }
 
-    if (!saveAll(cleaned)) {
+    if (!saveAll(cleaned, { reason: 'import' })) {
       return {
         ok: false,
         error: isEn
@@ -350,10 +493,22 @@
   }
 
   global.SM2Store = {
+    GUEST_STORAGE_KEY,
+    CLOUD_CACHE_KEY,
     getTodayStr,
     addDays,
+    setStorageKey,
+    getStorageKey,
+    loadFromKey,
+    saveToKey,
+    clearKey,
+    sanitizeProgressMap,
+    mergeProgress,
+    areProgressMapsEqual,
+    onChange,
     loadAll,
     saveAll,
+    replaceAll,
     getRecord,
     addWordToStudy,
     addWordsToStudy,

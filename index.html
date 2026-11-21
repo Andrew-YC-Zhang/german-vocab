@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#2563eb" />
-  <meta name="description" content="纯前端德语分级背单词 PWA，支持 A1-B2 分级、德语字母排序、名词四格变格、动词变位、语音朗读与 SM-2 记忆曲线复习。" />
+  <meta name="description" content="纯前端德语分级背单词 PWA，支持 A1-B2 分级、德语字母排序、名词四格变格、动词变位、语音朗读、云端同步与 SM-2 记忆曲线复习。" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="DeutschWort" />
@@ -40,6 +40,11 @@
         </nav>
 
         <div class="header-actions">
+          <button type="button" class="account-btn" id="btnAccount" title="账号与云同步管理">
+            <span class="sync-dot sync-dot-local" id="syncStatusDot" aria-hidden="true"></span>
+            <span class="account-btn-name" id="accountBtnLabel">游客模式</span>
+            <span class="sync-badge sync-badge-local" id="syncStatusBadge">仅本地</span>
+          </button>
           <div class="lang-switch" id="langSwitch" role="group" aria-label="语言切换 / Language">
             <button type="button" class="lang-btn active" data-lang="zh" id="btnLangZh" aria-pressed="true">中文</button>
             <button type="button" class="lang-btn" data-lang="en" id="btnLangEn" aria-pressed="false">EN</button>
@@ -139,10 +144,204 @@
     </section>
   </main>
 
+  <!-- 账号与同步管理弹窗 -->
+  <div class="modal-backdrop hidden" id="accountModal" role="dialog" aria-modal="true" aria-labelledby="accountModalTitle">
+    <div class="modal-card account-modal-card">
+      <div class="modal-header">
+        <div>
+          <h2 id="accountModalTitle">账号与学习进度同步</h2>
+          <p class="modal-subtitle" id="accountModalSubtitle">选择适合你的保存方式，随时可切换</p>
+        </div>
+        <button type="button" class="modal-close-btn" id="btnCloseAccountModal" aria-label="关闭">×</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- 当前身份状态卡片 -->
+        <div class="account-status-banner" id="accountStatusBanner">
+          <div class="account-status-info">
+            <div class="account-status-row">
+              <span class="sync-dot sync-dot-local" id="modalSyncDot" aria-hidden="true"></span>
+              <strong id="modalCurrentIdentity">游客模式（仅本地）</strong>
+              <span class="sync-badge sync-badge-local" id="modalSyncBadge">仅本地</span>
+            </div>
+            <p class="account-status-meta" id="modalCurrentMeta"></p>
+          </div>
+          <div class="account-status-actions hidden" id="modalLoggedInActions">
+            <button type="button" class="ghost-btn sync-now-btn" id="btnSyncNow">立即同步</button>
+            <button type="button" class="ghost-btn danger-ghost-btn" id="btnSignOut">退出登录</button>
+          </div>
+        </div>
+
+        <!-- 弹窗内反馈信息（错误/成功） -->
+        <div class="account-feedback hidden" id="accountFeedback" role="alert"></div>
+
+        <!-- 三种模式选择列表 -->
+        <div class="account-modes-list">
+          <!-- 模式 1：账号 + 密码（私密云同步） -->
+          <div class="account-mode-card active" id="modeCardAuth" data-account-mode="auth">
+            <button type="button" class="mode-card-header" data-select-mode="auth" aria-expanded="true">
+              <div class="mode-card-title-row">
+                <span class="mode-card-badge mode-badge-auth" id="mode1Tag">模式 1</span>
+                <span class="mode-card-title" id="mode1Title">账号 + 密码登录 / 注册（私密云同步）</span>
+                <span class="mode-current-pill hidden" id="mode1CurrentPill">当前使用</span>
+              </div>
+              <p class="mode-card-desc" id="mode1Desc">
+                私密云同步：个人进度独立加密保存，跨手机和电脑自动同步；注册时填邮箱可支持找回密码。
+              </p>
+            </button>
+
+            <div class="mode-card-panel" id="modePanelAuth">
+              <div class="auth-subtabs" role="tablist">
+                <button type="button" class="auth-subtab active" data-auth-tab="login" id="tabAuthLogin">登录</button>
+                <button type="button" class="auth-subtab" data-auth-tab="register" id="tabAuthRegister">注册新账号</button>
+                <button type="button" class="auth-subtab" data-auth-tab="reset" id="tabAuthReset">忘记密码</button>
+              </div>
+
+              <!-- 登录表单 -->
+              <form class="account-form" id="formAuthLogin" novalidate>
+                <div class="form-field">
+                  <label for="authLoginId" id="labelAuthLoginId">邮箱或用户名</label>
+                  <input type="text" id="authLoginId" autocomplete="username" spellcheck="false" />
+                  <p class="form-hint" id="hintAuthLoginId">注册时填过邮箱的请直接输入邮箱；未填邮箱的输入用户名即可。</p>
+                </div>
+                <div class="form-field">
+                  <label for="authLoginPassword" id="labelAuthLoginPassword">密码</label>
+                  <input type="password" id="authLoginPassword" autocomplete="current-password" />
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="primary-btn" id="btnAuthLoginSubmit">登录并同步</button>
+                  <button type="button" class="link-btn" id="btnSwitchToReset">忘记密码？</button>
+                </div>
+              </form>
+
+              <!-- 注册表单（做法 A） -->
+              <form class="account-form hidden" id="formAuthRegister" novalidate>
+                <div class="form-field">
+                  <label for="authRegUsername" id="labelAuthRegUsername">用户名（必填）</label>
+                  <input type="text" id="authRegUsername" autocomplete="username" spellcheck="false" />
+                  <p class="form-hint" id="hintAuthRegUsername">支持 2-24 位英文字母、数字或下划线（_）。</p>
+                </div>
+                <div class="form-field">
+                  <label for="authRegPassword" id="labelAuthRegPassword">密码（至少 6 位）</label>
+                  <input type="password" id="authRegPassword" autocomplete="new-password" />
+                </div>
+                <div class="form-field">
+                  <label for="authRegEmail" id="labelAuthRegEmail">邮箱（选填，用于找回密码）</label>
+                  <input type="email" id="authRegEmail" autocomplete="email" spellcheck="false" />
+                  <p class="form-hint form-hint-soft" id="hintAuthRegEmail">未填邮箱将无法找回密码</p>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="primary-btn" id="btnAuthRegisterSubmit">注册并开启云同步</button>
+                </div>
+              </form>
+
+              <!-- 忘记密码表单 -->
+              <form class="account-form hidden" id="formAuthReset" novalidate>
+                <div class="form-field">
+                  <label for="authResetEmail" id="labelAuthResetEmail">注册时填写的真实邮箱</label>
+                  <input type="email" id="authResetEmail" autocomplete="email" spellcheck="false" />
+                  <p class="form-hint" id="hintAuthResetEmail">仅适用于注册时填写了真实邮箱的账号。</p>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="primary-btn" id="btnAuthResetSubmit">发送重置密码邮件</button>
+                  <button type="button" class="link-btn" id="btnBackToLogin">返回登录</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- 模式 2：仅用户名免密同步 -->
+          <div class="account-mode-card" id="modeCardShared" data-account-mode="shared">
+            <button type="button" class="mode-card-header" data-select-mode="shared" aria-expanded="false">
+              <div class="mode-card-title-row">
+                <span class="mode-card-badge mode-badge-shared" id="mode2Tag">模式 2</span>
+                <span class="mode-card-title" id="mode2Title">仅用户名免密同步</span>
+                <span class="mode-current-pill hidden" id="mode2CurrentPill">当前使用</span>
+              </div>
+              <p class="mode-card-desc" id="mode2Desc">
+                快捷免密同步：无需密码，在任何设备输入相同用户名即可同步进度（他人猜到同名也可读写，建议使用独特代号）。
+              </p>
+            </button>
+
+            <div class="mode-card-panel hidden" id="modePanelShared">
+              <form class="account-form" id="formSharedLogin" novalidate>
+                <div class="form-field">
+                  <label for="sharedUsernameInput" id="labelSharedUsername">同步代号 / 用户名</label>
+                  <input type="text" id="sharedUsernameInput" autocomplete="off" spellcheck="false" />
+                  <p class="form-hint" id="hintSharedUsername">支持 2-32 位字母、数字、下划线（_）和连字符（-），自动转小写并去除首尾空格。</p>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="primary-btn" id="btnSharedLoginSubmit">启用此用户名同步</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- 模式 3：游客身份（仅本地保存） -->
+          <div class="account-mode-card" id="modeCardGuest" data-account-mode="guest">
+            <button type="button" class="mode-card-header" data-select-mode="guest" aria-expanded="false">
+              <div class="mode-card-title-row">
+                <span class="mode-card-badge mode-badge-guest" id="mode3Tag">模式 3</span>
+                <span class="mode-card-title" id="mode3Title">游客身份（仅本地保存）</span>
+                <span class="mode-current-pill" id="mode3CurrentPill">当前使用</span>
+              </div>
+              <p class="mode-card-desc" id="mode3Desc">
+                本地试用：无需注册，进度仅保存在当前浏览器中，清除缓存可能丢失（保留手动导出/导入 JSON 备份功能）。
+              </p>
+            </button>
+
+            <div class="mode-card-panel hidden" id="modePanelGuest">
+              <p class="guest-panel-note" id="guestPanelNote">
+                当前未登录云端账号，所有进度保存在浏览器本地，你也可以随时使用顶部的「导出进度 / 导入恢复」手动备份。
+              </p>
+              <div class="form-actions">
+                <button type="button" class="ghost-btn" id="btnSwitchToGuest">切换到游客模式</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 首次登录进度冲突确认弹窗 -->
+  <div class="modal-backdrop hidden" id="conflictModal" role="dialog" aria-modal="true" aria-labelledby="conflictModalTitle">
+    <div class="modal-card conflict-modal-card">
+      <div class="modal-header">
+        <h2 id="conflictModalTitle">检测到本地与云端均有学习进度</h2>
+      </div>
+      <div class="modal-body">
+        <p class="conflict-desc" id="conflictModalDesc"></p>
+        <div class="conflict-counts">
+          <div class="conflict-stat-box">
+            <span class="conflict-stat-label" id="conflictLocalLabel">当前浏览器本地进度</span>
+            <strong class="conflict-stat-num" id="conflictLocalCount">0</strong>
+          </div>
+          <div class="conflict-stat-box">
+            <span class="conflict-stat-label" id="conflictCloudLabel">云端已有进度</span>
+            <strong class="conflict-stat-num" id="conflictCloudCount">0</strong>
+          </div>
+        </div>
+        <div class="conflict-actions">
+          <button type="button" class="primary-btn" id="btnConflictMerge">合并保留最新进度（推荐）</button>
+          <button type="button" class="ghost-btn" id="btnConflictCloud">以云端为准（丢弃本地）</button>
+          <button type="button" class="link-btn" id="btnConflictCancel">取消登录</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <!-- Firebase Official Web SDK (v10 compat CDN, zero-build) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js" defer></script>
+
+  <script src="./js/firebase-config.js" defer></script>
   <script src="./js/speech.js" defer></script>
   <script src="./js/sm2.js" defer></script>
+  <script src="./js/sync.js" defer></script>
   <script src="./js/app.js" defer></script>
 </body>
 </html>

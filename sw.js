@@ -1,12 +1,14 @@
-const CACHE_NAME = 'deutschwort-cache-v4';
+const CACHE_NAME = 'deutschwort-cache-v5';
 
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './css/style.css',
-  './js/sm2.js',
+  './js/firebase-config.js',
   './js/speech.js',
+  './js/sm2.js',
+  './js/sync.js',
   './js/app.js',
   './data/a1.json',
   './data/a2.json',
@@ -15,6 +17,8 @@ const CORE_ASSETS = [
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];
+
+const BYPASS_HOST_PATTERN = /(^|\.)(firebaseapp\.com|firebaseio\.com|firebase\.google\.com|googleapis\.com|gstatic\.com|google\.com|googleusercontent\.com)$/i;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -41,7 +45,16 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return;
+
+  // 严格跳过 Firebase / Google APIs / 任何跨域网络请求，避免拦截认证与 Firestore 实时同步
+  if (
+    BYPASS_HOST_PATTERN.test(url.hostname) ||
+    url.hostname.indexOf('firebase') !== -1 ||
+    url.hostname.indexOf('googleapis') !== -1 ||
+    url.origin !== self.location.origin
+  ) {
+    return;
+  }
 
   // 词库 JSON 使用网络优先 + 离线缓存回退，方便更新词库后及时生效
   if (url.pathname.endsWith('.json')) {

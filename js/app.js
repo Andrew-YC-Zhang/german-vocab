@@ -116,7 +116,96 @@
       toastImportFail: (err) => '导入失败：' + err,
       toastImportOk: (n) => '已成功恢复 ' + n + ' 条学习进度',
       toastReadFail: '读取文件失败，请重试',
-      toastLangSwitched: '已切换为中文界面'
+      toastLangSwitched: '已切换为中文界面',
+      accountBtnTitle: '打开账号与学习进度同步管理',
+      guestLabel: '游客模式',
+      syncLocal: '仅本地',
+      syncSyncing: '同步中...',
+      syncSynced: '已同步',
+      syncError: '同步异常',
+      accountModalTitle: '账号与学习进度同步',
+      accountModalSubtitle: '选择适合你的保存方式，支持随时切换或退出',
+      modalCloseLabel: '关闭窗口',
+      statusGuestTitle: '当前身份：游客模式（仅本地）',
+      statusGuestMeta: '学习进度保存在当前浏览器中，可使用顶部「导出进度 / 导入恢复」备份。',
+      statusAuthTitle: (name) => '私密云同步 · ' + name,
+      statusAuthMeta: (email, syncedTime) =>
+        (email ? '绑定邮箱：' + email : '未绑定邮箱（不可找回密码）') +
+        (syncedTime ? ' · 最近同步：' + syncedTime : ''),
+      statusSharedTitle: (name) => '免密同步 · ' + name,
+      statusSharedMetaWithName: (name, syncedTime) =>
+        '共享代号：' + name + (syncedTime ? ' · 最近同步：' + syncedTime : ''),
+      btnSyncNow: '立即同步',
+      btnSyncing: '同步中...',
+      btnSignOut: '退出登录',
+      mode1Tag: '模式 1',
+      mode1Title: '账号 + 密码登录 / 注册（私密云同步）',
+      mode1Desc:
+        '私密云同步：个人进度独立加密保存，跨手机和电脑自动同步；注册时填邮箱可支持找回密码。',
+      mode2Tag: '模式 2',
+      mode2Title: '仅用户名免密同步',
+      mode2Desc:
+        '快捷免密同步：无需密码，在任何设备输入相同用户名即可同步进度（他人猜到同名也可读写，建议使用独特代号）。',
+      mode3Tag: '模式 3',
+      mode3Title: '游客身份（仅本地保存）',
+      mode3Desc:
+        '本地试用：无需注册，进度仅保存在当前浏览器中，清除缓存可能丢失（保留手动导出/导入 JSON 备份功能）。',
+      modeCurrentPill: '当前使用',
+      tabAuthLogin: '登录',
+      tabAuthRegister: '注册新账号',
+      tabAuthReset: '忘记密码',
+      labelAuthLoginId: '邮箱或用户名',
+      placeholderAuthLoginId: '输入邮箱或用户名',
+      hintAuthLoginId: '注册时填过邮箱的账号请直接输入邮箱；未填邮箱的账号输入用户名即可。',
+      labelAuthLoginPassword: '密码',
+      placeholderAuthLoginPassword: '输入登录密码',
+      btnAuthLoginSubmit: '登录并同步',
+      btnSwitchToReset: '忘记密码？',
+      labelAuthRegUsername: '用户名（必填）',
+      placeholderAuthRegUsername: '例如：anna_de01',
+      hintAuthRegUsername: '支持 2-24 位英文字母、数字和下划线（_）。',
+      labelAuthRegPassword: '密码（至少 6 位）',
+      placeholderAuthRegPassword: '至少 6 位字符',
+      labelAuthRegEmail: '邮箱（选填，用于忘记密码找回）',
+      placeholderAuthRegEmail: '选填，例如：name@example.com',
+      hintAuthRegEmail: '未填邮箱将无法找回密码',
+      btnAuthRegisterSubmit: '注册并开启云同步',
+      labelAuthResetEmail: '注册时填写的真实邮箱',
+      placeholderAuthResetEmail: '输入注册时绑定的邮箱',
+      hintAuthResetEmail: '仅注册时填写了真实邮箱的账号支持通过邮件重置密码。',
+      btnAuthResetSubmit: '发送重置密码邮件',
+      btnBackToLogin: '返回登录',
+      resetSentSuccess:
+        '重置链接已发送，若未收到请检查垃圾邮件箱（仅注册时填写了邮箱的账号可用）',
+      labelSharedUsername: '同步用户名 / 代号',
+      placeholderSharedUsername: '例如：berlin-2026_alex',
+      hintSharedUsername:
+        '自动去除首尾空格并转小写；仅允许 2-32 位字母、数字、下划线（_）和连字符（-）。',
+      btnSharedLoginSubmit: '开启此用户名同步',
+      guestPanelNoteActive:
+        '当前已处于游客模式，学习进度仅保存在当前浏览器本地，不会发起任何云端请求。',
+      guestPanelNoteSwitch:
+        '切换到游客模式后将退出当前云端账号，并清空浏览器中缓存的云端进度，恢复仅本地保存。',
+      btnSwitchToGuest: '切换到游客模式',
+      conflictModalTitle: '检测到本地与云端均有学习进度',
+      conflictModalDesc: (name) =>
+        '即将同步至账号「' + name + '」。当前浏览器本地进度与云端进度均不为空，请选择处理方式：',
+      conflictLocalLabel: '当前浏览器本地进度',
+      conflictCloudLabel: '云端已有进度',
+      conflictWordCount: (n) => n + ' 词',
+      btnConflictMerge: '合并保留最新进度（推荐）',
+      btnConflictCloud: '以云端为准（不保留本地）',
+      btnConflictCancel: '取消',
+      submittingText: '处理中...',
+      toastAuthLoggedIn: (name) => '已登录账号：' + name,
+      toastAuthRegistered: (name) => '注册成功，已开启私密云同步：' + name,
+      toastSharedConnected: (name) => '已连接免密同步用户名：' + name,
+      toastUploadedGuest: (n) => '已将本地 ' + n + ' 条学习进度自动上传至云端',
+      toastMergedGuest: (n) => '已合并并同步，共 ' + n + ' 条学习进度',
+      toastLoadedCloud: '已拉取云端最新进度',
+      toastSignedOut: '已退出登录，当前为游客模式（已清空本地云端缓存）',
+      toastSyncNowOk: '已与云端完成同步',
+      toastSyncNowFail: (err) => '同步失败：' + err
     },
     en: {
       htmlLang: 'en',
@@ -234,7 +323,98 @@
       toastImportOk: (n) =>
         'Restored ' + n + ' progress ' + (n === 1 ? 'record' : 'records'),
       toastReadFail: 'Failed to read file. Please try again.',
-      toastLangSwitched: 'Switched to English'
+      toastLangSwitched: 'Switched to English',
+      accountBtnTitle: 'Account & Cloud Sync Settings',
+      guestLabel: 'Guest Mode',
+      syncLocal: 'Local',
+      syncSyncing: 'Syncing...',
+      syncSynced: 'Synced',
+      syncError: 'Sync Error',
+      accountModalTitle: 'Account & Cloud Sync',
+      accountModalSubtitle: 'Choose how to save and sync your progress anytime',
+      modalCloseLabel: 'Close dialog',
+      statusGuestTitle: 'Current Mode: Guest Mode (Local Only)',
+      statusGuestMeta: 'Progress is stored in this browser only. Use Export / Import above to back up.',
+      statusAuthTitle: (name) => 'Private Cloud Sync · ' + name,
+      statusAuthMeta: (email, syncedTime) =>
+        (email ? 'Email: ' + email : 'No email linked (password reset unavailable)') +
+        (syncedTime ? ' · Last synced: ' + syncedTime : ''),
+      statusSharedTitle: (name) => 'Quick Sync · ' + name,
+      statusSharedMetaWithName: (name, syncedTime) =>
+        'Shared username: ' + name + (syncedTime ? ' · Last synced: ' + syncedTime : ''),
+      btnSyncNow: 'Sync Now',
+      btnSyncing: 'Syncing...',
+      btnSignOut: 'Sign Out',
+      mode1Tag: 'Mode 1',
+      mode1Title: 'Account + Password Sign In / Sign Up (Private Cloud Sync)',
+      mode1Desc:
+        'Private Cloud Sync: Your progress is securely synced across devices. Add an optional email to enable password recovery.',
+      mode2Tag: 'Mode 2',
+      mode2Title: 'Username-Only Quick Sync (No Password)',
+      mode2Desc:
+        'Quick Username Sync: No password needed. Enter the same username on any device to sync progress (anyone using the same name shares this data).',
+      mode3Tag: 'Mode 3',
+      mode3Title: 'Guest Mode (Local Storage Only)',
+      mode3Desc:
+        'Guest Mode: No sign-up required. Progress is saved only in this browser (use JSON export/import for backup).',
+      modeCurrentPill: 'Active',
+      tabAuthLogin: 'Sign In',
+      tabAuthRegister: 'Sign Up',
+      tabAuthReset: 'Forgot Password',
+      labelAuthLoginId: 'Email or Username',
+      placeholderAuthLoginId: 'Enter email or username',
+      hintAuthLoginId: 'Use your email if you added one at sign-up; otherwise enter your username.',
+      labelAuthLoginPassword: 'Password',
+      placeholderAuthLoginPassword: 'Enter your password',
+      btnAuthLoginSubmit: 'Sign In & Sync',
+      btnSwitchToReset: 'Forgot password?',
+      labelAuthRegUsername: 'Username (Required)',
+      placeholderAuthRegUsername: 'e.g. anna_de01',
+      hintAuthRegUsername: '2–24 characters: letters, numbers, and underscores (_).',
+      labelAuthRegPassword: 'Password (min. 6 characters)',
+      placeholderAuthRegPassword: 'At least 6 characters',
+      labelAuthRegEmail: 'Email (Optional, for password recovery)',
+      placeholderAuthRegEmail: 'Optional, e.g. name@example.com',
+      hintAuthRegEmail: 'Password reset is unavailable without an email',
+      btnAuthRegisterSubmit: 'Sign Up & Enable Sync',
+      labelAuthResetEmail: 'Registered Email Address',
+      placeholderAuthResetEmail: 'Enter the email used at sign-up',
+      hintAuthResetEmail: 'Only available for accounts registered with a real email.',
+      btnAuthResetSubmit: 'Send Reset Link',
+      btnBackToLogin: 'Back to Sign In',
+      resetSentSuccess:
+        'Password reset link sent. If you don’t see it, check your spam folder (available only for accounts registered with an email).',
+      labelSharedUsername: 'Sync Username / Code',
+      placeholderSharedUsername: 'e.g. berlin-2026_alex',
+      hintSharedUsername:
+        'Trimmed & lowercased automatically; 2–32 chars using letters, numbers, underscores (_), and hyphens (-).',
+      btnSharedLoginSubmit: 'Use This Username to Sync',
+      guestPanelNoteActive:
+        'You are currently in Guest Mode. Progress stays strictly in this browser with zero cloud requests.',
+      guestPanelNoteSwitch:
+        'Switching to Guest Mode will sign you out and clear cached cloud progress from this browser.',
+      btnSwitchToGuest: 'Switch to Guest Mode',
+      conflictModalTitle: 'Local & Cloud Progress Found',
+      conflictModalDesc: (name) =>
+        'Syncing with "' + name + '". Both this browser and the cloud have saved progress. How would you like to proceed?',
+      conflictLocalLabel: 'Local Browser Progress',
+      conflictCloudLabel: 'Cloud Progress',
+      conflictWordCount: (n) => n + (n === 1 ? ' word' : ' words'),
+      btnConflictMerge: 'Merge & Keep Latest (Recommended)',
+      btnConflictCloud: 'Use Cloud Progress (Discard Local)',
+      btnConflictCancel: 'Cancel',
+      submittingText: 'Working...',
+      toastAuthLoggedIn: (name) => 'Signed in as ' + name,
+      toastAuthRegistered: (name) => 'Account created & cloud sync enabled: ' + name,
+      toastSharedConnected: (name) => 'Quick username sync active: ' + name,
+      toastUploadedGuest: (n) =>
+        'Uploaded ' + n + ' local progress ' + (n === 1 ? 'record' : 'records') + ' to cloud',
+      toastMergedGuest: (n) =>
+        'Merged & synced ' + n + ' total ' + (n === 1 ? 'record' : 'records'),
+      toastLoadedCloud: 'Loaded latest cloud progress',
+      toastSignedOut: 'Signed out to Guest Mode (local cloud cache cleared)',
+      toastSyncNowOk: 'Synced with cloud',
+      toastSyncNowFail: (err) => 'Sync failed: ' + err
     }
   };
 
@@ -269,7 +449,13 @@
     reviewQueue: [],
     reviewRevealed: false,
     reviewDoneCount: 0,
-    activeSpeakEl: null
+    activeSpeakEl: null,
+    accountModalOpen: false,
+    accountSelectedMode: 'auth', // 'auth' | 'shared' | 'guest'
+    authSubTab: 'login', // 'login' | 'register' | 'reset'
+    accountBusy: false,
+    conflictResolver: null,
+    conflictContext: null
   };
 
   function isEn() {
@@ -314,7 +500,87 @@
     scopeAll: document.getElementById('scopeAll'),
     reviewCounter: document.getElementById('reviewCounter'),
     reviewStage: document.getElementById('reviewStage'),
-    toast: document.getElementById('toast')
+    toast: document.getElementById('toast'),
+
+    // 账号与同步弹窗 DOM
+    btnAccount: document.getElementById('btnAccount'),
+    syncStatusDot: document.getElementById('syncStatusDot'),
+    accountBtnLabel: document.getElementById('accountBtnLabel'),
+    syncStatusBadge: document.getElementById('syncStatusBadge'),
+    accountModal: document.getElementById('accountModal'),
+    accountModalTitle: document.getElementById('accountModalTitle'),
+    accountModalSubtitle: document.getElementById('accountModalSubtitle'),
+    btnCloseAccountModal: document.getElementById('btnCloseAccountModal'),
+    modalSyncDot: document.getElementById('modalSyncDot'),
+    modalCurrentIdentity: document.getElementById('modalCurrentIdentity'),
+    modalSyncBadge: document.getElementById('modalSyncBadge'),
+    modalCurrentMeta: document.getElementById('modalCurrentMeta'),
+    modalLoggedInActions: document.getElementById('modalLoggedInActions'),
+    btnSyncNow: document.getElementById('btnSyncNow'),
+    btnSignOut: document.getElementById('btnSignOut'),
+    accountFeedback: document.getElementById('accountFeedback'),
+    modeCardAuth: document.getElementById('modeCardAuth'),
+    modeCardShared: document.getElementById('modeCardShared'),
+    modeCardGuest: document.getElementById('modeCardGuest'),
+    modePanelAuth: document.getElementById('modePanelAuth'),
+    modePanelShared: document.getElementById('modePanelShared'),
+    modePanelGuest: document.getElementById('modePanelGuest'),
+    mode1Tag: document.getElementById('mode1Tag'),
+    mode1Title: document.getElementById('mode1Title'),
+    mode1Desc: document.getElementById('mode1Desc'),
+    mode1CurrentPill: document.getElementById('mode1CurrentPill'),
+    mode2Tag: document.getElementById('mode2Tag'),
+    mode2Title: document.getElementById('mode2Title'),
+    mode2Desc: document.getElementById('mode2Desc'),
+    mode2CurrentPill: document.getElementById('mode2CurrentPill'),
+    mode3Tag: document.getElementById('mode3Tag'),
+    mode3Title: document.getElementById('mode3Title'),
+    mode3Desc: document.getElementById('mode3Desc'),
+    mode3CurrentPill: document.getElementById('mode3CurrentPill'),
+    tabAuthLogin: document.getElementById('tabAuthLogin'),
+    tabAuthRegister: document.getElementById('tabAuthRegister'),
+    tabAuthReset: document.getElementById('tabAuthReset'),
+    formAuthLogin: document.getElementById('formAuthLogin'),
+    labelAuthLoginId: document.getElementById('labelAuthLoginId'),
+    authLoginId: document.getElementById('authLoginId'),
+    hintAuthLoginId: document.getElementById('hintAuthLoginId'),
+    labelAuthLoginPassword: document.getElementById('labelAuthLoginPassword'),
+    authLoginPassword: document.getElementById('authLoginPassword'),
+    btnAuthLoginSubmit: document.getElementById('btnAuthLoginSubmit'),
+    btnSwitchToReset: document.getElementById('btnSwitchToReset'),
+    formAuthRegister: document.getElementById('formAuthRegister'),
+    labelAuthRegUsername: document.getElementById('labelAuthRegUsername'),
+    authRegUsername: document.getElementById('authRegUsername'),
+    hintAuthRegUsername: document.getElementById('hintAuthRegUsername'),
+    labelAuthRegPassword: document.getElementById('labelAuthRegPassword'),
+    authRegPassword: document.getElementById('authRegPassword'),
+    labelAuthRegEmail: document.getElementById('labelAuthRegEmail'),
+    authRegEmail: document.getElementById('authRegEmail'),
+    hintAuthRegEmail: document.getElementById('hintAuthRegEmail'),
+    btnAuthRegisterSubmit: document.getElementById('btnAuthRegisterSubmit'),
+    formAuthReset: document.getElementById('formAuthReset'),
+    labelAuthResetEmail: document.getElementById('labelAuthResetEmail'),
+    authResetEmail: document.getElementById('authResetEmail'),
+    hintAuthResetEmail: document.getElementById('hintAuthResetEmail'),
+    btnAuthResetSubmit: document.getElementById('btnAuthResetSubmit'),
+    btnBackToLogin: document.getElementById('btnBackToLogin'),
+    formSharedLogin: document.getElementById('formSharedLogin'),
+    labelSharedUsername: document.getElementById('labelSharedUsername'),
+    sharedUsernameInput: document.getElementById('sharedUsernameInput'),
+    hintSharedUsername: document.getElementById('hintSharedUsername'),
+    btnSharedLoginSubmit: document.getElementById('btnSharedLoginSubmit'),
+    guestPanelNote: document.getElementById('guestPanelNote'),
+    btnSwitchToGuest: document.getElementById('btnSwitchToGuest'),
+    conflictModal: document.getElementById('conflictModal'),
+    conflictModalTitle: document.getElementById('conflictModalTitle'),
+    conflictModalDesc: document.getElementById('conflictModalDesc'),
+    conflictLocalLabel: document.getElementById('conflictLocalLabel'),
+    conflictLocalCount: document.getElementById('conflictLocalCount'),
+    conflictCloudLabel: document.getElementById('conflictCloudLabel'),
+    conflictCloudCount: document.getElementById('conflictCloudCount'),
+    btnConflictMerge: document.getElementById('btnConflictMerge'),
+    btnConflictCloud: document.getElementById('btnConflictCloud'),
+    btnConflictCancel: document.getElementById('btnConflictCancel')
   };
 
   let toastTimer = null;
@@ -586,6 +852,340 @@
       els.btnLangZh.setAttribute('aria-pressed', zhActive ? 'true' : 'false');
       els.btnLangEn.classList.toggle('active', !zhActive);
       els.btnLangEn.setAttribute('aria-pressed', !zhActive ? 'true' : 'false');
+    }
+
+    // 账号与云同步弹窗双语文案
+    if (els.btnAccount) els.btnAccount.title = dict.accountBtnTitle;
+    if (els.accountModalTitle) els.accountModalTitle.textContent = dict.accountModalTitle;
+    if (els.accountModalSubtitle) els.accountModalSubtitle.textContent = dict.accountModalSubtitle;
+    if (els.btnCloseAccountModal) els.btnCloseAccountModal.setAttribute('aria-label', dict.modalCloseLabel);
+    if (els.btnSignOut) els.btnSignOut.textContent = dict.btnSignOut;
+
+    if (els.mode1Tag) els.mode1Tag.textContent = dict.mode1Tag;
+    if (els.mode1Title) els.mode1Title.textContent = dict.mode1Title;
+    if (els.mode1Desc) els.mode1Desc.textContent = dict.mode1Desc;
+    if (els.mode1CurrentPill) els.mode1CurrentPill.textContent = dict.modeCurrentPill;
+
+    if (els.mode2Tag) els.mode2Tag.textContent = dict.mode2Tag;
+    if (els.mode2Title) els.mode2Title.textContent = dict.mode2Title;
+    if (els.mode2Desc) els.mode2Desc.textContent = dict.mode2Desc;
+    if (els.mode2CurrentPill) els.mode2CurrentPill.textContent = dict.modeCurrentPill;
+
+    if (els.mode3Tag) els.mode3Tag.textContent = dict.mode3Tag;
+    if (els.mode3Title) els.mode3Title.textContent = dict.mode3Title;
+    if (els.mode3Desc) els.mode3Desc.textContent = dict.mode3Desc;
+    if (els.mode3CurrentPill) els.mode3CurrentPill.textContent = dict.modeCurrentPill;
+
+    if (els.tabAuthLogin) els.tabAuthLogin.textContent = dict.tabAuthLogin;
+    if (els.tabAuthRegister) els.tabAuthRegister.textContent = dict.tabAuthRegister;
+    if (els.tabAuthReset) els.tabAuthReset.textContent = dict.tabAuthReset;
+
+    if (els.labelAuthLoginId) els.labelAuthLoginId.textContent = dict.labelAuthLoginId;
+    if (els.authLoginId) els.authLoginId.placeholder = dict.placeholderAuthLoginId;
+    if (els.hintAuthLoginId) els.hintAuthLoginId.textContent = dict.hintAuthLoginId;
+    if (els.labelAuthLoginPassword) els.labelAuthLoginPassword.textContent = dict.labelAuthLoginPassword;
+    if (els.authLoginPassword) els.authLoginPassword.placeholder = dict.placeholderAuthLoginPassword;
+    if (els.btnSwitchToReset) els.btnSwitchToReset.textContent = dict.btnSwitchToReset;
+
+    if (els.labelAuthRegUsername) els.labelAuthRegUsername.textContent = dict.labelAuthRegUsername;
+    if (els.authRegUsername) els.authRegUsername.placeholder = dict.placeholderAuthRegUsername;
+    if (els.hintAuthRegUsername) els.hintAuthRegUsername.textContent = dict.hintAuthRegUsername;
+    if (els.labelAuthRegPassword) els.labelAuthRegPassword.textContent = dict.labelAuthRegPassword;
+    if (els.authRegPassword) els.authRegPassword.placeholder = dict.placeholderAuthRegPassword;
+    if (els.labelAuthRegEmail) els.labelAuthRegEmail.textContent = dict.labelAuthRegEmail;
+    if (els.authRegEmail) els.authRegEmail.placeholder = dict.placeholderAuthRegEmail;
+    if (els.hintAuthRegEmail) els.hintAuthRegEmail.textContent = dict.hintAuthRegEmail;
+
+    if (els.labelAuthResetEmail) els.labelAuthResetEmail.textContent = dict.labelAuthResetEmail;
+    if (els.authResetEmail) els.authResetEmail.placeholder = dict.placeholderAuthResetEmail;
+    if (els.hintAuthResetEmail) els.hintAuthResetEmail.textContent = dict.hintAuthResetEmail;
+    if (els.btnBackToLogin) els.btnBackToLogin.textContent = dict.btnBackToLogin;
+
+    if (els.labelSharedUsername) els.labelSharedUsername.textContent = dict.labelSharedUsername;
+    if (els.sharedUsernameInput) els.sharedUsernameInput.placeholder = dict.placeholderSharedUsername;
+    if (els.hintSharedUsername) els.hintSharedUsername.textContent = dict.hintSharedUsername;
+
+    if (els.btnSwitchToGuest) els.btnSwitchToGuest.textContent = dict.btnSwitchToGuest;
+
+    if (!state.accountBusy) {
+      if (els.btnAuthLoginSubmit) els.btnAuthLoginSubmit.textContent = dict.btnAuthLoginSubmit;
+      if (els.btnAuthRegisterSubmit) els.btnAuthRegisterSubmit.textContent = dict.btnAuthRegisterSubmit;
+      if (els.btnAuthResetSubmit) els.btnAuthResetSubmit.textContent = dict.btnAuthResetSubmit;
+      if (els.btnSharedLoginSubmit) els.btnSharedLoginSubmit.textContent = dict.btnSharedLoginSubmit;
+    }
+
+    if (els.conflictModalTitle) els.conflictModalTitle.textContent = dict.conflictModalTitle;
+    if (els.conflictLocalLabel) els.conflictLocalLabel.textContent = dict.conflictLocalLabel;
+    if (els.conflictCloudLabel) els.conflictCloudLabel.textContent = dict.conflictCloudLabel;
+    if (els.btnConflictMerge) els.btnConflictMerge.textContent = dict.btnConflictMerge;
+    if (els.btnConflictCloud) els.btnConflictCloud.textContent = dict.btnConflictCloud;
+    if (els.btnConflictCancel) els.btnConflictCancel.textContent = dict.btnConflictCancel;
+    if (state.conflictContext) {
+      updateConflictModalCopy();
+    }
+
+    updateAccountUI();
+  }
+
+  function formatSyncClock(ts) {
+    if (!ts) return '';
+    try {
+      const d = new Date(ts);
+      const hh = d.getHours() < 10 ? '0' + d.getHours() : String(d.getHours());
+      const mm = d.getMinutes() < 10 ? '0' + d.getMinutes() : String(d.getMinutes());
+      return hh + ':' + mm;
+    } catch (_e) {
+      return '';
+    }
+  }
+
+  function getSyncStatusMeta(syncStatus) {
+    const dict = t();
+    if (syncStatus === 'synced') {
+      return { dotClass: 'sync-dot-synced', badgeClass: 'sync-badge-synced', label: dict.syncSynced };
+    }
+    if (syncStatus === 'syncing') {
+      return { dotClass: 'sync-dot-syncing', badgeClass: 'sync-badge-syncing', label: dict.syncSyncing };
+    }
+    if (syncStatus === 'error') {
+      return { dotClass: 'sync-dot-error', badgeClass: 'sync-badge-error', label: dict.syncError };
+    }
+    return { dotClass: 'sync-dot-local', badgeClass: 'sync-badge-local', label: dict.syncLocal };
+  }
+
+  function updateAccountUI() {
+    const syncState = window.CloudSync
+      ? window.CloudSync.getState()
+      : { mode: 'guest', username: '', email: '', syncStatus: 'local', lastSyncedAt: null };
+    const dict = t();
+    const statusMeta = getSyncStatusMeta(syncState.syncStatus);
+    const syncedClock = formatSyncClock(syncState.lastSyncedAt);
+
+    // 顶部按钮
+    if (els.accountBtnLabel) {
+      els.accountBtnLabel.textContent =
+        syncState.mode === 'guest' ? dict.guestLabel : (syncState.username || dict.guestLabel);
+    }
+    if (els.syncStatusDot) {
+      els.syncStatusDot.className = 'sync-dot ' + statusMeta.dotClass;
+    }
+    if (els.syncStatusBadge) {
+      els.syncStatusBadge.className = 'sync-badge ' + statusMeta.badgeClass;
+      els.syncStatusBadge.textContent = statusMeta.label;
+    }
+
+    // 弹窗顶部状态条
+    if (els.modalSyncDot) {
+      els.modalSyncDot.className = 'sync-dot ' + statusMeta.dotClass;
+    }
+    if (els.modalSyncBadge) {
+      els.modalSyncBadge.className = 'sync-badge ' + statusMeta.badgeClass;
+      els.modalSyncBadge.textContent = statusMeta.label;
+    }
+
+    if (syncState.mode === 'auth') {
+      if (els.modalCurrentIdentity) {
+        els.modalCurrentIdentity.textContent = dict.statusAuthTitle(syncState.username);
+      }
+      if (els.modalCurrentMeta) {
+        els.modalCurrentMeta.textContent =
+          syncState.syncStatus === 'error' && syncState.lastError
+            ? syncState.lastError
+            : dict.statusAuthMeta(syncState.hasRealEmail ? syncState.email : '', syncedClock);
+      }
+      if (els.modalLoggedInActions) els.modalLoggedInActions.classList.remove('hidden');
+    } else if (syncState.mode === 'shared') {
+      if (els.modalCurrentIdentity) {
+        els.modalCurrentIdentity.textContent = dict.statusSharedTitle(syncState.username);
+      }
+      if (els.modalCurrentMeta) {
+        els.modalCurrentMeta.textContent =
+          syncState.syncStatus === 'error' && syncState.lastError
+            ? syncState.lastError
+            : dict.statusSharedMetaWithName(syncState.username, syncedClock);
+      }
+      if (els.modalLoggedInActions) els.modalLoggedInActions.classList.remove('hidden');
+    } else {
+      if (els.modalCurrentIdentity) els.modalCurrentIdentity.textContent = dict.statusGuestTitle;
+      if (els.modalCurrentMeta) els.modalCurrentMeta.textContent = dict.statusGuestMeta;
+      if (els.modalLoggedInActions) els.modalLoggedInActions.classList.add('hidden');
+    }
+
+    if (els.btnSyncNow) {
+      const syncing = syncState.syncStatus === 'syncing';
+      els.btnSyncNow.textContent = syncing ? dict.btnSyncing : dict.btnSyncNow;
+      els.btnSyncNow.disabled = syncing || state.accountBusy;
+    }
+
+    // 三张模式卡片上的「当前使用」胶囊
+    if (els.mode1CurrentPill) els.mode1CurrentPill.classList.toggle('hidden', syncState.mode !== 'auth');
+    if (els.mode2CurrentPill) els.mode2CurrentPill.classList.toggle('hidden', syncState.mode !== 'shared');
+    if (els.mode3CurrentPill) els.mode3CurrentPill.classList.toggle('hidden', syncState.mode !== 'guest');
+
+    // 游客卡片内提示与按钮状态
+    if (els.guestPanelNote) {
+      els.guestPanelNote.textContent =
+        syncState.mode === 'guest' ? dict.guestPanelNoteActive : dict.guestPanelNoteSwitch;
+    }
+    if (els.btnSwitchToGuest) {
+      els.btnSwitchToGuest.classList.toggle('hidden', syncState.mode === 'guest');
+    }
+  }
+
+  function showAccountFeedback(message, type) {
+    if (!els.accountFeedback) return;
+    els.accountFeedback.textContent = message;
+    els.accountFeedback.classList.remove('hidden', 'feedback-error', 'feedback-success');
+    els.accountFeedback.classList.add(type === 'success' ? 'feedback-success' : 'feedback-error');
+  }
+
+  function clearAccountFeedback() {
+    if (!els.accountFeedback) return;
+    els.accountFeedback.textContent = '';
+    els.accountFeedback.classList.add('hidden');
+    els.accountFeedback.classList.remove('feedback-error', 'feedback-success');
+  }
+
+  function selectAccountModeCard(mode) {
+    state.accountSelectedMode = mode;
+    const mapping = [
+      { key: 'auth', card: els.modeCardAuth, panel: els.modePanelAuth },
+      { key: 'shared', card: els.modeCardShared, panel: els.modePanelShared },
+      { key: 'guest', card: els.modeCardGuest, panel: els.modePanelGuest }
+    ];
+    mapping.forEach((item) => {
+      const active = item.key === mode;
+      if (item.card) {
+        item.card.classList.toggle('active', active);
+        const headerBtn = item.card.querySelector('.mode-card-header');
+        if (headerBtn) headerBtn.setAttribute('aria-expanded', active ? 'true' : 'false');
+      }
+      if (item.panel) {
+        item.panel.classList.toggle('hidden', !active);
+      }
+    });
+    clearAccountFeedback();
+  }
+
+  function selectAuthSubTab(tab) {
+    state.authSubTab = tab;
+    if (els.tabAuthLogin) els.tabAuthLogin.classList.toggle('active', tab === 'login');
+    if (els.tabAuthRegister) els.tabAuthRegister.classList.toggle('active', tab === 'register');
+    if (els.tabAuthReset) els.tabAuthReset.classList.toggle('active', tab === 'reset');
+
+    if (els.formAuthLogin) els.formAuthLogin.classList.toggle('hidden', tab !== 'login');
+    if (els.formAuthRegister) els.formAuthRegister.classList.toggle('hidden', tab !== 'register');
+    if (els.formAuthReset) els.formAuthReset.classList.toggle('hidden', tab !== 'reset');
+    clearAccountFeedback();
+  }
+
+  function setAccountBusy(busy) {
+    state.accountBusy = busy;
+    const dict = t();
+    const btns = [
+      { el: els.btnAuthLoginSubmit, label: dict.btnAuthLoginSubmit },
+      { el: els.btnAuthRegisterSubmit, label: dict.btnAuthRegisterSubmit },
+      { el: els.btnAuthResetSubmit, label: dict.btnAuthResetSubmit },
+      { el: els.btnSharedLoginSubmit, label: dict.btnSharedLoginSubmit },
+      { el: els.btnSwitchToGuest, label: dict.btnSwitchToGuest },
+      { el: els.btnSignOut, label: dict.btnSignOut }
+    ];
+    btns.forEach((item) => {
+      if (!item.el) return;
+      item.el.disabled = busy;
+      if (item.el !== els.btnSignOut && item.el !== els.btnSwitchToGuest) {
+        item.el.textContent = busy ? dict.submittingText : item.label;
+      }
+    });
+    if (els.btnSyncNow) {
+      els.btnSyncNow.disabled = busy;
+    }
+  }
+
+  function openAccountModal() {
+    if (!els.accountModal) return;
+    state.accountModalOpen = true;
+    const syncState = window.CloudSync ? window.CloudSync.getState() : { mode: 'guest', username: '' };
+    selectAccountModeCard(syncState.mode === 'shared' ? 'shared' : 'auth');
+    if (syncState.mode === 'shared' && els.sharedUsernameInput && !els.sharedUsernameInput.value) {
+      els.sharedUsernameInput.value = syncState.username || '';
+    }
+    updateAccountUI();
+    clearAccountFeedback();
+    els.accountModal.classList.remove('hidden');
+  }
+
+  function closeAccountModal() {
+    if (!els.accountModal) return;
+    state.accountModalOpen = false;
+    els.accountModal.classList.add('hidden');
+    clearAccountFeedback();
+  }
+
+  function updateConflictModalCopy() {
+    if (!state.conflictContext) return;
+    const dict = t();
+    if (els.conflictModalDesc) {
+      els.conflictModalDesc.textContent = dict.conflictModalDesc(state.conflictContext.username || '');
+    }
+    if (els.conflictLocalCount) {
+      els.conflictLocalCount.textContent = dict.conflictWordCount(state.conflictContext.guestCount || 0);
+    }
+    if (els.conflictCloudCount) {
+      els.conflictCloudCount.textContent = dict.conflictWordCount(state.conflictContext.cloudCount || 0);
+    }
+  }
+
+  function openConflictModal(ctx) {
+    return new Promise((resolve) => {
+      state.conflictContext = ctx || { guestCount: 0, cloudCount: 0, username: '' };
+      state.conflictResolver = resolve;
+      updateConflictModalCopy();
+      if (els.conflictModal) {
+        els.conflictModal.classList.remove('hidden');
+      }
+    });
+  }
+
+  function resolveConflict(choice) {
+    if (els.conflictModal) {
+      els.conflictModal.classList.add('hidden');
+    }
+    const resolver = state.conflictResolver;
+    state.conflictResolver = null;
+    state.conflictContext = null;
+    if (typeof resolver === 'function') {
+      resolver(choice);
+    }
+  }
+
+  function refreshAfterProgressChange() {
+    if (!state.vocabLoaded) return;
+    updateHeaderStats();
+    if (state.currentMode === 'review') {
+      rebuildReviewQueue();
+      renderReviewView();
+    } else {
+      renderWordList();
+    }
+  }
+
+  function showMigrationToast(result, fallbackToast) {
+    const dict = t();
+    if (result && result.migration === 'uploaded' && result.uploadedCount > 0) {
+      showToast(dict.toastUploadedGuest(result.uploadedCount));
+      return;
+    }
+    if (result && result.migration === 'merged') {
+      showToast(dict.toastMergedGuest(result.mergedCount || 0));
+      return;
+    }
+    if (result && result.migration === 'cloud') {
+      showToast(dict.toastLoadedCloud);
+      return;
+    }
+    if (fallbackToast) {
+      showToast(fallbackToast);
     }
   }
 
@@ -1755,8 +2355,21 @@
       renderReviewView();
     });
 
-    // 桌面快捷键支持（浏览模式：← → 切词；复习模式：空格显示答案，1-4 选择掌握度）
+    // 桌面快捷键支持（弹窗打开时优先响应 Esc；浏览模式：← → 切词；复习模式：空格显示答案，1-4 选择掌握度）
     document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (state.conflictResolver) {
+          resolveConflict('cancel');
+          return;
+        }
+        if (state.accountModalOpen && !state.accountBusy) {
+          closeAccountModal();
+          return;
+        }
+      }
+
+      if (state.accountModalOpen || state.conflictResolver) return;
+
       const tag = e.target && e.target.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
 
@@ -1833,6 +2446,212 @@
       };
       reader.readAsText(file, 'utf-8');
     });
+
+    // ==================== 账号与同步弹窗交互 ====================
+
+    if (els.btnAccount) {
+      els.btnAccount.addEventListener('click', openAccountModal);
+    }
+
+    if (els.btnCloseAccountModal) {
+      els.btnCloseAccountModal.addEventListener('click', () => {
+        if (!state.accountBusy) closeAccountModal();
+      });
+    }
+
+    if (els.accountModal) {
+      els.accountModal.addEventListener('click', (e) => {
+        if (e.target === els.accountModal && !state.accountBusy) {
+          closeAccountModal();
+        }
+      });
+
+      els.accountModal.addEventListener('click', (e) => {
+        const modeHeader = e.target.closest('[data-select-mode]');
+        if (modeHeader && !state.accountBusy) {
+          selectAccountModeCard(modeHeader.dataset.selectMode);
+          return;
+        }
+        const authTab = e.target.closest('[data-auth-tab]');
+        if (authTab && !state.accountBusy) {
+          selectAuthSubTab(authTab.dataset.authTab);
+        }
+      });
+    }
+
+    if (els.btnSwitchToReset) {
+      els.btnSwitchToReset.addEventListener('click', () => selectAuthSubTab('reset'));
+    }
+
+    if (els.btnBackToLogin) {
+      els.btnBackToLogin.addEventListener('click', () => selectAuthSubTab('login'));
+    }
+
+    // 模式 1：登录提交
+    if (els.formAuthLogin) {
+      els.formAuthLogin.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (state.accountBusy || !window.CloudSync) return;
+        clearAccountFeedback();
+        setAccountBusy(true);
+        try {
+          const result = await window.CloudSync.loginWithPassword({
+            identifier: els.authLoginId ? els.authLoginId.value : '',
+            password: els.authLoginPassword ? els.authLoginPassword.value : '',
+            lang: state.lang
+          });
+          if (!result.ok) {
+            if (!result.cancelled && result.error) {
+              showAccountFeedback(result.error, 'error');
+            }
+            return;
+          }
+          if (els.authLoginPassword) els.authLoginPassword.value = '';
+          closeAccountModal();
+          showMigrationToast(result, t().toastAuthLoggedIn(result.username));
+        } finally {
+          setAccountBusy(false);
+          updateAccountUI();
+        }
+      });
+    }
+
+    // 模式 1：注册提交（做法 A）
+    if (els.formAuthRegister) {
+      els.formAuthRegister.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (state.accountBusy || !window.CloudSync) return;
+        clearAccountFeedback();
+        setAccountBusy(true);
+        try {
+          const result = await window.CloudSync.registerWithPassword({
+            username: els.authRegUsername ? els.authRegUsername.value : '',
+            password: els.authRegPassword ? els.authRegPassword.value : '',
+            email: els.authRegEmail ? els.authRegEmail.value : '',
+            lang: state.lang
+          });
+          if (!result.ok) {
+            if (result.error) showAccountFeedback(result.error, 'error');
+            return;
+          }
+          if (els.authRegPassword) els.authRegPassword.value = '';
+          closeAccountModal();
+          showMigrationToast(result, t().toastAuthRegistered(result.username));
+        } finally {
+          setAccountBusy(false);
+          updateAccountUI();
+        }
+      });
+    }
+
+    // 模式 1：忘记密码
+    if (els.formAuthReset) {
+      els.formAuthReset.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (state.accountBusy || !window.CloudSync) return;
+        clearAccountFeedback();
+        setAccountBusy(true);
+        try {
+          const result = await window.CloudSync.sendPasswordReset({
+            email: els.authResetEmail ? els.authResetEmail.value : '',
+            lang: state.lang
+          });
+          if (!result.ok) {
+            if (result.error) showAccountFeedback(result.error, 'error');
+            return;
+          }
+          showAccountFeedback(t().resetSentSuccess, 'success');
+        } finally {
+          setAccountBusy(false);
+        }
+      });
+    }
+
+    // 模式 2：仅用户名免密同步
+    if (els.formSharedLogin) {
+      els.formSharedLogin.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (state.accountBusy || !window.CloudSync) return;
+        clearAccountFeedback();
+        setAccountBusy(true);
+        try {
+          const result = await window.CloudSync.loginSharedUsername({
+            username: els.sharedUsernameInput ? els.sharedUsernameInput.value : '',
+            lang: state.lang
+          });
+          if (!result.ok) {
+            if (!result.cancelled && result.error) {
+              showAccountFeedback(result.error, 'error');
+            }
+            return;
+          }
+          if (els.sharedUsernameInput && result.username) {
+            els.sharedUsernameInput.value = result.username;
+          }
+          closeAccountModal();
+          showMigrationToast(result, t().toastSharedConnected(result.username));
+        } finally {
+          setAccountBusy(false);
+          updateAccountUI();
+        }
+      });
+    }
+
+    // 手动「立即同步」
+    if (els.btnSyncNow) {
+      els.btnSyncNow.addEventListener('click', async () => {
+        if (state.accountBusy || !window.CloudSync) return;
+        clearAccountFeedback();
+        setAccountBusy(true);
+        try {
+          const result = await window.CloudSync.syncNow(state.lang);
+          if (!result.ok) {
+            showAccountFeedback(result.error, 'error');
+            showToast(t().toastSyncNowFail(result.error));
+            return;
+          }
+          showAccountFeedback(t().toastSyncNowOk, 'success');
+          showToast(t().toastSyncNowOk);
+        } finally {
+          setAccountBusy(false);
+          updateAccountUI();
+        }
+      });
+    }
+
+    // 退出登录 / 切换到游客模式（统一清空云端本地缓存，防多账号串数据）
+    async function handleSwitchToGuest() {
+      if (state.accountBusy || !window.CloudSync) return;
+      clearAccountFeedback();
+      setAccountBusy(true);
+      try {
+        await window.CloudSync.switchToGuest();
+        closeAccountModal();
+        showToast(t().toastSignedOut);
+      } finally {
+        setAccountBusy(false);
+        updateAccountUI();
+      }
+    }
+
+    if (els.btnSignOut) {
+      els.btnSignOut.addEventListener('click', handleSwitchToGuest);
+    }
+
+    if (els.btnSwitchToGuest) {
+      els.btnSwitchToGuest.addEventListener('click', handleSwitchToGuest);
+    }
+
+    // 冲突确认弹窗按钮
+    if (els.btnConflictMerge) {
+      els.btnConflictMerge.addEventListener('click', () => resolveConflict('merge'));
+    }
+    if (els.btnConflictCloud) {
+      els.btnConflictCloud.addEventListener('click', () => resolveConflict('cloud'));
+    }
+    if (els.btnConflictCancel) {
+      els.btnConflictCancel.addEventListener('click', () => resolveConflict('cancel'));
+    }
   }
 
   // ==================== 数据加载与初始化 ====================
@@ -1861,6 +2680,23 @@
   }
 
   async function init() {
+    // 先初始化云同步与本地存储命名空间，再绑定事件并加载词库
+    if (window.SM2Store && window.CloudSync) {
+      window.SM2Store.onChange(() => {
+        window.CloudSync.pushCurrentProgress(state.lang);
+      });
+      window.CloudSync.init({
+        getLang: () => state.lang,
+        onStateChange: () => {
+          updateAccountUI();
+        },
+        onProgressUpdated: () => {
+          refreshAfterProgressChange();
+        },
+        onConflict: (ctx) => openConflictModal(ctx)
+      });
+    }
+
     applyStaticTranslations();
     if (els.progressSummary) {
       els.progressSummary.textContent = t().loadingVocab;
@@ -1883,6 +2719,7 @@
     if (initialWords.length > 0) {
       state.selectedWordId = initialWords[0].id;
     }
+    state.vocabLoaded = true;
 
     updateHeaderStats();
     renderAlphaBar();
