@@ -98,6 +98,36 @@ button {
   flex-wrap: wrap;
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.header-back-btn {
+  display: none;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid var(--border);
+  background: var(--surface-subtle);
+  color: var(--text);
+  padding: 5px 8px 5px 5px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.header-back-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -1203,6 +1233,12 @@ button {
   color: var(--text-muted);
 }
 
+.review-reveal-bar {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
 .reveal-btn {
   margin-top: 12px;
   min-width: 220px;
@@ -1278,6 +1314,10 @@ button {
   font-size: 12px;
   font-weight: 500;
   opacity: 0.85;
+}
+
+.rate-interval-short {
+  display: none;
 }
 
 .rate-again {
@@ -1978,5 +2018,286 @@ button:disabled {
   .account-status-banner {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+/* ==================== 手机端极简空间优化（<= 768px） ==================== */
+
+@media (max-width: 768px) {
+  /* 1. 词库列表态：取消大头部吸顶占用，随列表自然滚动收起 */
+  body:not(.mobile-detail-open):not(.mode-review) .app-header {
+    position: static;
+  }
+
+  /* 2. 单词详情态 & 今日复习态：共用单行紧凑吸顶栏（48px–52px，绝不换行） */
+  body.mobile-detail-open .app-header,
+  body.mode-review .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+
+  body.mobile-detail-open .header-inner,
+  body.mode-review .header-inner {
+    padding: 6px 10px;
+    gap: 0;
+  }
+
+  body.mobile-detail-open .header-top,
+  body.mode-review .header-top {
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    min-height: 36px;
+    height: 36px;
+  }
+
+  body.mobile-detail-open .header-sub,
+  body.mode-review .header-sub,
+  body.mobile-detail-open .header-actions,
+  body.mode-review .header-actions {
+    display: none;
+  }
+
+  body.mobile-detail-open .header-left,
+  body.mode-review .header-left {
+    gap: 6px;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  body.mobile-detail-open .brand,
+  body.mode-review .brand {
+    gap: 6px;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  body.mobile-detail-open .brand-badge,
+  body.mode-review .brand-badge {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    font-size: 10px;
+    gap: 2px;
+    letter-spacing: 0.2px;
+    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.22);
+  }
+
+  body.mobile-detail-open .brand-badge .tricolor,
+  body.mode-review .brand-badge .tricolor {
+    width: 14px;
+    height: 2px;
+  }
+
+  body.mobile-detail-open .brand-text,
+  body.mode-review .brand-text {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  body.mobile-detail-open .brand-text h1,
+  body.mode-review .brand-text h1 {
+    font-size: 14px;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  body.mobile-detail-open .mode-switch,
+  body.mode-review .mode-switch {
+    padding: 2px;
+    gap: 2px;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+
+  body.mobile-detail-open .mode-btn,
+  body.mode-review .mode-btn {
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    line-height: 1.15;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  body.mobile-detail-open .due-badge,
+  body.mode-review .due-badge {
+    min-width: 17px;
+    height: 17px;
+    padding: 0 5px;
+    font-size: 10.5px;
+  }
+
+  body.mobile-detail-open .detail-card,
+  body.mode-review .detail-card {
+    padding: 14px 14px;
+    gap: 16px;
+  }
+
+  /* 3. 单词详情态专属优化 */
+  body.mobile-detail-open:not(.mode-review) .header-back-btn {
+    display: inline-flex;
+    padding: 5px 7px 5px 4px;
+    font-size: 12.5px;
+  }
+
+  body.mobile-detail-open:not(.mode-review) .brand-text h1 {
+    font-size: 13.5px;
+  }
+
+  body.mobile-detail-open .app-main {
+    padding: 8px 10px 16px;
+  }
+
+  body.mobile-detail-open .browse-layout.mobile-detail-open .mobile-back-btn {
+    display: none;
+  }
+
+  body.mobile-detail-open .detail-nav-bar {
+    padding: 6px 10px;
+    margin-bottom: 8px;
+    gap: 6px;
+    border-radius: 10px;
+    flex-wrap: nowrap;
+  }
+
+  body.mobile-detail-open .detail-pane {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom));
+  }
+
+  /* 4. 今日复习态专属优化：进度计数在可滚动区顶部 + 底部固定操作栏（单行显示答案 / 1×4 评分） */
+  body.mode-review .app-main {
+    padding: 8px 10px 0;
+  }
+
+  body.mode-review .review-layout {
+    gap: 8px;
+  }
+
+  body.mode-review .review-toolbar {
+    gap: 6px;
+    padding: 2px 2px;
+  }
+
+  body.mode-review .review-scope {
+    gap: 5px;
+  }
+
+  body.mode-review .scope-chip {
+    padding: 3px 9px;
+    font-size: 12px;
+  }
+
+  body.mode-review .review-counter {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  body.mode-review .review-stage {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+
+  body.mode-review .flashcard-front {
+    padding: 30px 16px 26px;
+    gap: 14px;
+  }
+
+  body.mode-review .review-reveal-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 25;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.06);
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  }
+
+  body.mode-review .review-reveal-bar .reveal-btn {
+    margin-top: 0;
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+    padding: 0 16px;
+    border-radius: 10px;
+    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.22);
+  }
+
+  body.mode-review .rating-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 25;
+    margin-top: 0;
+    border-radius: 0;
+    border: none;
+    border-top: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.06);
+    padding: 7px 10px calc(7px + env(safe-area-inset-bottom));
+  }
+
+  body.mode-review .rating-prompt {
+    display: none;
+  }
+
+  body.mode-review .rating-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  body.mode-review .rate-btn {
+    padding: 6px 4px;
+    min-height: 46px;
+    border-radius: 10px;
+    gap: 2px;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  body.mode-review .rate-btn strong {
+    font-size: 13.5px;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  body.mode-review .rate-interval-full {
+    display: none;
+  }
+
+  body.mode-review .rate-interval-short {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.15;
+    white-space: nowrap;
+    opacity: 0.88;
+  }
+
+  body.mode-review .toast {
+    bottom: calc(74px + env(safe-area-inset-bottom));
+  }
+}
+
+/* 极窄屏（<= 380px）详情态下隐藏品牌文字仅留图标，确保顶栏绝不折行 */
+@media (max-width: 380px) {
+  body.mobile-detail-open:not(.mode-review) .brand-text {
+    display: none;
   }
 }
