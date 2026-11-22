@@ -24,6 +24,8 @@
       searchPlaceholder: '搜索德语单词、中文或英文释义...',
       clearSearchLabel: '清除搜索',
       mobileBack: '← 返回列表',
+      headerBack: '返回',
+      headerBackLabel: '返回词库列表',
       navHint: '左右滑或按 ← → 切词',
       prevWord: '‹ 上一个',
       prevWordTitle: '上一个单词（左方向键 / 右滑）',
@@ -225,6 +227,8 @@
       searchPlaceholder: 'Search German words or English meanings...',
       clearSearchLabel: 'Clear search',
       mobileBack: '← Back',
+      headerBack: 'Back',
+      headerBackLabel: 'Back to word list',
       navHint: 'Swipe or press ← →',
       prevWord: '‹ Prev',
       prevWordTitle: 'Previous word (Left arrow / Swipe right)',
@@ -480,6 +484,8 @@
 
   // DOM 缓存
   const els = {
+    btnHeaderBack: document.getElementById('btnHeaderBack'),
+    headerBackLabel: document.getElementById('headerBackLabel'),
     brandSubtitle: document.getElementById('brandSubtitle'),
     btnModeBrowse: document.getElementById('btnModeBrowse'),
     btnModeReview: document.getElementById('btnModeReview'),
@@ -891,6 +897,8 @@
     if (els.searchInput) els.searchInput.placeholder = dict.searchPlaceholder;
     if (els.btnClearSearch) els.btnClearSearch.setAttribute('aria-label', dict.clearSearchLabel);
     if (els.btnMobileBack) els.btnMobileBack.textContent = dict.mobileBack;
+    if (els.headerBackLabel) els.headerBackLabel.textContent = dict.headerBack;
+    if (els.btnHeaderBack) els.btnHeaderBack.setAttribute('aria-label', dict.headerBackLabel);
     if (els.detailNavHint) els.detailNavHint.textContent = dict.navHint;
     if (els.btnPrevWord) {
       els.btnPrevWord.textContent = dict.prevWord;
@@ -1957,6 +1965,45 @@
     });
   }
 
+  // ==================== 移动端视图状态与紧凑间隔 ====================
+
+  function syncBodyViewState() {
+    const isReview = state.currentMode === 'review';
+    const isDetailOpen = !isReview && els.browseView.classList.contains('mobile-detail-open');
+    document.body.classList.toggle('mode-review', isReview);
+    document.body.classList.toggle('mobile-detail-open', isDetailOpen);
+  }
+
+  function openMobileDetail() {
+    els.browseView.classList.add('mobile-detail-open');
+    syncBodyViewState();
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
+  function closeMobileDetail() {
+    els.browseView.classList.remove('mobile-detail-open');
+    syncBodyViewState();
+    window.GermanSpeech.stop();
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
+  function formatCompactInterval(days) {
+    if (days <= 0) return '10m';
+    if (days < 30) return days + 'd';
+    if (days < 365) return (days / 30).toFixed(1).replace(/\.0$/, '') + 'mo';
+    return (days / 365).toFixed(1).replace(/\.0$/, '') + 'y';
+  }
+
+  function getCompactIntervalPreviews(wordId) {
+    const rec = window.SM2Store.getRecord(wordId);
+    return {
+      again: formatCompactInterval(window.SM2Store.calculateNext(rec, 'again').interval),
+      hard: formatCompactInterval(window.SM2Store.calculateNext(rec, 'hard').interval),
+      good: formatCompactInterval(window.SM2Store.calculateNext(rec, 'good').interval),
+      easy: formatCompactInterval(window.SM2Store.calculateNext(rec, 'easy').interval)
+    };
+  }
+
   // ==================== 今日复习（SM-2）渲染 ====================
 
   function rebuildReviewQueue() {
@@ -2102,14 +2149,17 @@
         '<div class="flashcard-hint">' +
         escapeHtml(hintText) +
         '</div>' +
+        '<div class="review-reveal-bar">' +
         '<button type="button" class="reveal-btn" id="btnRevealAnswer">' +
         escapeHtml(dict.revealBtn) +
         '</button>' +
+        '</div>' +
         '</div>';
       return;
     }
 
     const previews = window.SM2Store.previewIntervals(currentWord.id, state.lang);
+    const compactPreviews = getCompactIntervalPreviews(currentWord.id);
     els.reviewStage.innerHTML =
       buildWordCardHtml(currentWord, { hideStudyControls: true }) +
       '<div class="rating-bar">' +
@@ -2119,23 +2169,31 @@
       '<div class="rating-grid">' +
       '<button type="button" class="rate-btn rate-again" data-rate="again"><strong>' +
       escapeHtml(dict.rateAgain) +
-      '</strong><span>' +
+      '</strong><span class="rate-interval-full">' +
       escapeHtml(previews.again) +
+      '</span><span class="rate-interval-short">' +
+      escapeHtml(compactPreviews.again) +
       '</span></button>' +
       '<button type="button" class="rate-btn rate-hard" data-rate="hard"><strong>' +
       escapeHtml(dict.rateHard) +
-      '</strong><span>' +
+      '</strong><span class="rate-interval-full">' +
       escapeHtml(previews.hard) +
+      '</span><span class="rate-interval-short">' +
+      escapeHtml(compactPreviews.hard) +
       '</span></button>' +
       '<button type="button" class="rate-btn rate-good" data-rate="good"><strong>' +
       escapeHtml(dict.rateGood) +
-      '</strong><span>' +
+      '</strong><span class="rate-interval-full">' +
       escapeHtml(previews.good) +
+      '</span><span class="rate-interval-short">' +
+      escapeHtml(compactPreviews.good) +
       '</span></button>' +
       '<button type="button" class="rate-btn rate-easy" data-rate="easy"><strong>' +
       escapeHtml(dict.rateEasy) +
-      '</strong><span>' +
+      '</strong><span class="rate-interval-full">' +
       escapeHtml(previews.easy) +
+      '</span><span class="rate-interval-short">' +
+      escapeHtml(compactPreviews.easy) +
       '</span></button>' +
       '</div>' +
       '</div>';
@@ -2164,13 +2222,29 @@
   // ==================== 切换与交互事件 ====================
 
   async function switchMode(mode) {
+    if (
+      mode === 'browse' &&
+      state.currentMode === 'browse' &&
+      els.browseView.classList.contains('mobile-detail-open')
+    ) {
+      closeMobileDetail();
+      return;
+    }
+
     window.GermanSpeech.stop();
+    const wasDetailOpen = els.browseView.classList.contains('mobile-detail-open');
     state.currentMode = mode;
 
     els.btnModeBrowse.classList.toggle('active', mode === 'browse');
     els.btnModeReview.classList.toggle('active', mode === 'review');
     els.browseView.classList.toggle('hidden', mode !== 'browse');
     els.reviewView.classList.toggle('hidden', mode !== 'review');
+    els.browseView.classList.remove('mobile-detail-open');
+    syncBodyViewState();
+
+    if (mode === 'review' || wasDetailOpen) {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
 
     if (mode === 'review') {
       if (state.reviewScope === 'all') {
@@ -2214,6 +2288,7 @@
     els.searchInput.value = '';
     els.btnClearSearch.classList.add('hidden');
     els.browseView.classList.remove('mobile-detail-open');
+    syncBodyViewState();
 
     els.levelTabs.forEach((tab) => {
       const isActive = tab.dataset.level === level;
@@ -2329,16 +2404,20 @@
       state.selectedWordId = id;
       renderWordList();
       if (window.innerWidth <= 860) {
-        els.browseView.classList.add('mobile-detail-open');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        openMobileDetail();
       }
     });
 
     // 移动端返回列表 & 上一个/下一个按钮
     els.btnMobileBack.addEventListener('click', () => {
-      els.browseView.classList.remove('mobile-detail-open');
-      window.GermanSpeech.stop();
+      closeMobileDetail();
     });
+
+    if (els.btnHeaderBack) {
+      els.btnHeaderBack.addEventListener('click', () => {
+        closeMobileDetail();
+      });
+    }
 
     els.btnPrevWord.addEventListener('click', () => navigateWord(-1));
     els.btnNextWord.addEventListener('click', () => navigateWord(1));
@@ -2885,6 +2964,7 @@
     }
 
     applyStaticTranslations();
+    syncBodyViewState();
     if (els.progressSummary) {
       els.progressSummary.textContent = t().loadingLevel(state.currentLevel.toUpperCase());
     }
