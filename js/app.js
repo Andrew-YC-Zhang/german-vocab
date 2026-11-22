@@ -4,6 +4,8 @@
   const LEVELS = ['a1', 'a2', 'b1', 'b2'];
   const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
   const LANG_STORAGE_KEY = 'deutschwort_lang_v1';
+  const STATUS_FILTER_STORAGE_KEY = 'deutschwort_status_filter_v1';
+  const VALID_STATUS_FILTERS = ['all', 'unlearned', 'learned'];
   const CJK_REGEX = /[\u4e00-\u9fff]/;
   const germanCollator = new Intl.Collator('de-DE', {
     usage: 'sort',
@@ -53,6 +55,17 @@
       jumpA2: '切换到 A2 词库',
       jumpB1: '切换到 B1 词库',
       noSearchResult: (q) => '未找到与“' + q + '”匹配的单词。',
+      statusFilterLabel: '学习状态筛选',
+      filterAll: '全部',
+      filterUnlearned: '未学习',
+      filterLearned: '已学习',
+      emptyUnlearnedTitle: '本等级词汇已全部加入学习！',
+      emptyUnlearnedDesc: '太棒了！当前等级已经没有未学习的单词，可以切换到「全部」复习浏览，或前往「今日复习」巩固记忆。',
+      emptyLearnedTitle: '本等级暂无已学习单词',
+      emptyLearnedDesc: '可切换到「未学习」或「全部」，打开单词点击「+ 加入今日复习」开始学习。',
+      emptySearchFilteredHint: '当前筛选条件下未找到匹配项，可切回「全部」查看。',
+      btnShowAllWords: '查看全部词汇',
+      btnGoReview: '前往今日复习',
       selectWordTitle: '请选择一个单词',
       selectWordDesc: '点击左侧列表中的任意德语单词，查看完整释义、变格/变位表和例句。',
       detailPosition: (idx, total) => '第 ' + idx + ' / ' + total + ' 词',
@@ -256,6 +269,17 @@
       jumpA2: 'Switch to A2',
       jumpB1: 'Switch to B1',
       noSearchResult: (q) => 'No words found matching "' + q + '".',
+      statusFilterLabel: 'Filter by learning status',
+      filterAll: 'All',
+      filterUnlearned: 'Unlearned',
+      filterLearned: 'Learned',
+      emptyUnlearnedTitle: 'All words in this level are already learned!',
+      emptyUnlearnedDesc: 'Great job! There are no unlearned words left in this level. Switch to "All" to browse every word or open "Review" to practice.',
+      emptyLearnedTitle: 'No learned words in this level yet',
+      emptyLearnedDesc: 'Switch to "Unlearned" or "All", open a word, and click "+ Add to Review" to start tracking progress.',
+      emptySearchFilteredHint: 'No matches under the current filter. Try switching to "All".',
+      btnShowAllWords: 'Show All Words',
+      btnGoReview: 'Go to Review',
       selectWordTitle: 'Select a word',
       selectWordDesc:
         'Choose any German word from the list to view definitions, declension/conjugation tables, and examples.',
@@ -449,8 +473,26 @@
     }
   }
 
+  function loadSavedStatusFilter() {
+    try {
+      const saved = window.localStorage.getItem(STATUS_FILTER_STORAGE_KEY);
+      return VALID_STATUS_FILTERS.includes(saved) ? saved : 'all';
+    } catch (_e) {
+      return 'all';
+    }
+  }
+
+  function saveStatusFilter(filter) {
+    try {
+      window.localStorage.setItem(STATUS_FILTER_STORAGE_KEY, filter);
+    } catch (_e) {
+      // ignore storage errors
+    }
+  }
+
   const state = {
     lang: loadSavedLang(), // 'zh' | 'en'
+    statusFilter: loadSavedStatusFilter(), // 'all' | 'unlearned' | 'learned'
     vocabByLevel: { a1: [], a2: [], b1: [], b2: [] },
     loadedLevels: {},
     loadingPromises: {},
@@ -460,6 +502,7 @@
     searchQuery: '',
     activeLetter: 'ALL',
     selectedWordId: null,
+    detailSessionIds: null, // 详情页阅读/切词快照，防止在未学习筛选下加入复习导致跳词或踢出
     detailTransition: null, // 'next' | 'prev' | null
     reviewScope: 'level', // 'level' | 'all'
     reviewQueue: [],
@@ -503,6 +546,14 @@
     reviewView: document.getElementById('reviewView'),
     searchInput: document.getElementById('searchInput'),
     btnClearSearch: document.getElementById('btnClearSearch'),
+    statusFilterBar: document.getElementById('statusFilterBar'),
+    statusFilterChips: document.querySelectorAll('.status-filter-chip'),
+    filterStatusAllLabel: document.getElementById('filterStatusAllLabel'),
+    filterStatusUnlearnedLabel: document.getElementById('filterStatusUnlearnedLabel'),
+    filterStatusLearnedLabel: document.getElementById('filterStatusLearnedLabel'),
+    filterCountAll: document.getElementById('filterCountAll'),
+    filterCountUnlearned: document.getElementById('filterCountUnlearned'),
+    filterCountLearned: document.getElementById('filterCountLearned'),
     alphaBar: document.getElementById('alphaBar'),
     listMeta: document.getElementById('listMeta'),
     wordList: document.getElementById('wordList'),
@@ -896,6 +947,10 @@
     }
     if (els.searchInput) els.searchInput.placeholder = dict.searchPlaceholder;
     if (els.btnClearSearch) els.btnClearSearch.setAttribute('aria-label', dict.clearSearchLabel);
+    if (els.statusFilterBar) els.statusFilterBar.setAttribute('aria-label', dict.statusFilterLabel);
+    if (els.filterStatusAllLabel) els.filterStatusAllLabel.textContent = dict.filterAll;
+    if (els.filterStatusUnlearnedLabel) els.filterStatusUnlearnedLabel.textContent = dict.filterUnlearned;
+    if (els.filterStatusLearnedLabel) els.filterStatusLearnedLabel.textContent = dict.filterLearned;
     if (els.btnMobileBack) els.btnMobileBack.textContent = dict.mobileBack;
     if (els.headerBackLabel) els.headerBackLabel.textContent = dict.headerBack;
     if (els.btnHeaderBack) els.btnHeaderBack.setAttribute('aria-label', dict.headerBackLabel);
@@ -1225,11 +1280,14 @@
 
   function refreshAfterProgressChange() {
     if (!state.vocabLoaded) return;
+    state.detailSessionIds = null;
     updateHeaderStats();
+    updateStatusFilterUI();
     if (state.currentMode === 'review') {
       rebuildReviewQueue();
       renderReviewView();
     } else {
+      renderAlphaBar();
       renderWordList();
     }
   }
@@ -1264,7 +1322,7 @@
     if (state.currentMode === 'review') {
       renderReviewView();
     } else {
-      renderWordList();
+      renderWordList({ preserveDetail: Boolean(state.detailSessionIds) });
     }
     if (!silent) {
       showToast(t().toastLangSwitched);
@@ -1397,8 +1455,49 @@
 
   // ==================== 词库浏览渲染 ====================
 
-  function getFilteredWords() {
+  function getWordsByStatusFilter() {
     const words = state.vocabByLevel[state.currentLevel] || [];
+    if (state.statusFilter === 'all') return words;
+    const progress = window.SM2Store.loadAll();
+    if (state.statusFilter === 'unlearned') {
+      return words.filter((w) => !progress[w.id]);
+    }
+    return words.filter((w) => Boolean(progress[w.id]));
+  }
+
+  function updateStatusFilterUI() {
+    const levelWords = state.vocabByLevel[state.currentLevel] || [];
+    const progress = window.SM2Store.loadAll();
+    const allCount = levelWords.length;
+    const learnedCount = levelWords.filter((w) => Boolean(progress[w.id])).length;
+    const unlearnedCount = allCount - learnedCount;
+
+    if (els.filterCountAll) els.filterCountAll.textContent = String(allCount);
+    if (els.filterCountUnlearned) els.filterCountUnlearned.textContent = String(unlearnedCount);
+    if (els.filterCountLearned) els.filterCountLearned.textContent = String(learnedCount);
+
+    if (els.statusFilterChips) {
+      els.statusFilterChips.forEach((chip) => {
+        const isActive = chip.dataset.statusFilter === state.statusFilter;
+        chip.classList.toggle('active', isActive);
+        chip.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+    }
+  }
+
+  function setStatusFilter(filter) {
+    const nextFilter = VALID_STATUS_FILTERS.includes(filter) ? filter : 'all';
+    state.statusFilter = nextFilter;
+    saveStatusFilter(nextFilter);
+    state.activeLetter = 'ALL';
+    state.detailSessionIds = null;
+    updateStatusFilterUI();
+    renderAlphaBar();
+    renderWordList();
+  }
+
+  function getFilteredWords() {
+    const words = getWordsByStatusFilter();
     const qRaw = state.searchQuery.trim().toLowerCase();
     if (!qRaw) return words;
 
@@ -1430,8 +1529,20 @@
     });
   }
 
+  function getDetailNavigationWords() {
+    if (Array.isArray(state.detailSessionIds) && state.detailSessionIds.length > 0) {
+      const resolved = state.detailSessionIds
+        .map((id) => state.allWordsMap[id])
+        .filter(Boolean);
+      if (resolved.length > 0) {
+        return resolved;
+      }
+    }
+    return getFilteredWords();
+  }
+
   function renderAlphaBar() {
-    const words = state.vocabByLevel[state.currentLevel] || [];
+    const words = getWordsByStatusFilter();
     const available = new Set(words.map((w) => getGermanInitial(w.word)));
 
     let html =
@@ -1459,12 +1570,43 @@
     els.alphaBar.innerHTML = html;
   }
 
-  function renderWordList() {
+  function renderEmptyStatusDetail(icon, title, desc, showReviewBtn) {
+    const dict = t();
+    els.detailNavBar.classList.add('hidden');
+    els.detailContent.innerHTML =
+      '<div class="empty-card">' +
+      '<div class="empty-icon">' +
+      icon +
+      '</div>' +
+      '<h2>' +
+      escapeHtml(title) +
+      '</h2>' +
+      '<p>' +
+      escapeHtml(desc) +
+      '</p>' +
+      '<div class="empty-actions">' +
+      '<button type="button" class="primary-btn" data-status-action="show-all">' +
+      escapeHtml(dict.btnShowAllWords) +
+      '</button>' +
+      (showReviewBtn
+        ? '<button type="button" class="secondary-btn" data-status-action="go-review">' +
+          escapeHtml(dict.btnGoReview) +
+          '</button>'
+        : '') +
+      '</div>' +
+      '</div>';
+  }
+
+  function renderWordList(options) {
+    const opts = options || {};
+    const preserveDetail = Boolean(opts.preserveDetail);
     const allInLevel = state.vocabByLevel[state.currentLevel] || [];
     const filtered = getFilteredWords();
     const progress = window.SM2Store.loadAll();
     const dict = t();
     const enMode = isEn();
+
+    updateStatusFilterUI();
 
     els.listMeta.innerHTML =
       '<span>' +
@@ -1484,17 +1626,75 @@
     }
 
     if (filtered.length === 0) {
-      els.wordList.innerHTML =
-        '<div style="padding:28px 14px;text-align:center;color:var(--text-muted);font-size:14px;">' +
-        escapeHtml(dict.noSearchResult(state.searchQuery)) +
-        '</div>';
-      updateDetailNavBar();
+      const hasSearch = Boolean(state.searchQuery.trim());
+      if (hasSearch) {
+        els.wordList.innerHTML =
+          '<div class="list-empty-state">' +
+          '<div class="list-empty-desc">' +
+          escapeHtml(dict.noSearchResult(state.searchQuery)) +
+          '</div>' +
+          (state.statusFilter !== 'all'
+            ? '<div class="list-empty-desc">' +
+              escapeHtml(dict.emptySearchFilteredHint) +
+              '</div><div class="list-empty-actions"><button type="button" class="primary-btn" data-status-action="show-all">' +
+              escapeHtml(dict.btnShowAllWords) +
+              '</button></div>'
+            : '') +
+          '</div>';
+      } else if (state.statusFilter === 'unlearned') {
+        els.wordList.innerHTML =
+          '<div class="list-empty-state">' +
+          '<div class="list-empty-icon">🎉</div>' +
+          '<div class="list-empty-title">' +
+          escapeHtml(dict.emptyUnlearnedTitle) +
+          '</div>' +
+          '<div class="list-empty-desc">' +
+          escapeHtml(dict.emptyUnlearnedDesc) +
+          '</div>' +
+          '<div class="list-empty-actions">' +
+          '<button type="button" class="primary-btn" data-status-action="show-all">' +
+          escapeHtml(dict.btnShowAllWords) +
+          '</button>' +
+          '<button type="button" class="secondary-btn" data-status-action="go-review">' +
+          escapeHtml(dict.btnGoReview) +
+          '</button>' +
+          '</div>' +
+          '</div>';
+      } else {
+        els.wordList.innerHTML =
+          '<div class="list-empty-state">' +
+          '<div class="list-empty-icon">📖</div>' +
+          '<div class="list-empty-title">' +
+          escapeHtml(dict.emptyLearnedTitle) +
+          '</div>' +
+          '<div class="list-empty-desc">' +
+          escapeHtml(dict.emptyLearnedDesc) +
+          '</div>' +
+          '<div class="list-empty-actions">' +
+          '<button type="button" class="primary-btn" data-status-action="show-all">' +
+          escapeHtml(dict.btnShowAllWords) +
+          '</button>' +
+          '</div>' +
+          '</div>';
+      }
+
+      if (preserveDetail && state.selectedWordId && state.allWordsMap[state.selectedWordId]) {
+        renderDetail();
+      } else if (!hasSearch && state.statusFilter === 'unlearned') {
+        state.detailSessionIds = null;
+        renderEmptyStatusDetail('🎉', dict.emptyUnlearnedTitle, dict.emptyUnlearnedDesc, true);
+      } else if (!hasSearch && state.statusFilter === 'learned') {
+        state.detailSessionIds = null;
+        renderEmptyStatusDetail('📖', dict.emptyLearnedTitle, dict.emptyLearnedDesc, false);
+      } else {
+        updateDetailNavBar();
+      }
       return;
     }
 
-    // 如果当前未选中词，或者选中的词不在当前等级里，默认选中第一个
+    // 如果当前未选中词，或者选中的词不在当前列表中，非保活模式下默认选中第一个
     const inFiltered = filtered.some((w) => w.id === state.selectedWordId);
-    if (!inFiltered) {
+    if (!preserveDetail && !inFiltered) {
       state.selectedWordId = filtered[0].id;
     }
 
@@ -1868,25 +2068,25 @@
   }
 
   function updateDetailNavBar() {
-    const filtered = getFilteredWords();
-    const idx = filtered.findIndex((item) => item.id === state.selectedWordId);
-    if (filtered.length === 0 || idx === -1) {
+    const navWords = getDetailNavigationWords();
+    const idx = navWords.findIndex((item) => item.id === state.selectedWordId);
+    if (navWords.length === 0 || idx === -1) {
       els.detailNavBar.classList.add('hidden');
       return;
     }
 
     els.detailNavBar.classList.remove('hidden');
-    els.detailPosition.textContent = t().detailPosition(idx + 1, filtered.length);
+    els.detailPosition.textContent = t().detailPosition(idx + 1, navWords.length);
     els.btnPrevWord.disabled = idx <= 0;
-    els.btnNextWord.disabled = idx >= filtered.length - 1;
+    els.btnNextWord.disabled = idx >= navWords.length - 1;
   }
 
   function navigateWord(delta) {
     if (state.currentMode !== 'browse') return;
-    const filtered = getFilteredWords();
-    if (filtered.length === 0) return;
+    const navWords = getDetailNavigationWords();
+    if (navWords.length === 0) return;
 
-    const currentIdx = filtered.findIndex((item) => item.id === state.selectedWordId);
+    const currentIdx = navWords.findIndex((item) => item.id === state.selectedWordId);
     if (currentIdx === -1) return;
 
     const nextIdx = currentIdx + delta;
@@ -1894,15 +2094,22 @@
       showToast(t().toastFirstWord);
       return;
     }
-    if (nextIdx >= filtered.length) {
+    if (nextIdx >= navWords.length) {
       showToast(t().toastLastWord);
       return;
     }
 
     window.GermanSpeech.stop();
-    state.selectedWordId = filtered[nextIdx].id;
+    state.selectedWordId = navWords[nextIdx].id;
     state.detailTransition = delta > 0 ? 'next' : 'prev';
-    renderWordList();
+
+    if (els.browseView.classList.contains('mobile-detail-open')) {
+      renderDetail();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    renderWordList({ preserveDetail: true });
 
     // 同步桌面端左侧列表选中项可见，移动端则回到详情顶部
     const selectedBtn = els.wordList.querySelector('.word-item.selected');
@@ -1982,8 +2189,11 @@
 
   function closeMobileDetail() {
     els.browseView.classList.remove('mobile-detail-open');
+    state.detailSessionIds = null;
     syncBodyViewState();
     window.GermanSpeech.stop();
+    renderAlphaBar();
+    renderWordList();
     window.scrollTo({ top: 0, behavior: 'auto' });
   }
 
@@ -2234,6 +2444,7 @@
     window.GermanSpeech.stop();
     const wasDetailOpen = els.browseView.classList.contains('mobile-detail-open');
     state.currentMode = mode;
+    state.detailSessionIds = null;
 
     els.btnModeBrowse.classList.toggle('active', mode === 'browse');
     els.btnModeReview.classList.toggle('active', mode === 'review');
@@ -2285,10 +2496,12 @@
     state.currentLevel = level;
     state.activeLetter = 'ALL';
     state.searchQuery = '';
+    state.detailSessionIds = null;
     els.searchInput.value = '';
     els.btnClearSearch.classList.add('hidden');
     els.browseView.classList.remove('mobile-detail-open');
     syncBodyViewState();
+    updateStatusFilterUI();
 
     els.levelTabs.forEach((tab) => {
       const isActive = tab.dataset.level === level;
@@ -2343,11 +2556,19 @@
       tab.addEventListener('click', () => switchLevel(tab.dataset.level));
     });
 
+    // 学习状态筛选（全部 / 未学习 / 已学习）
+    if (els.statusFilterChips) {
+      els.statusFilterChips.forEach((chip) => {
+        chip.addEventListener('click', () => setStatusFilter(chip.dataset.statusFilter));
+      });
+    }
+
     // 搜索输入
     els.searchInput.addEventListener('input', (e) => {
       state.searchQuery = e.target.value;
       els.btnClearSearch.classList.toggle('hidden', !state.searchQuery);
       state.activeLetter = 'ALL';
+      state.detailSessionIds = null;
       renderAlphaBar();
       renderWordList();
     });
@@ -2356,6 +2577,7 @@
       state.searchQuery = '';
       els.searchInput.value = '';
       els.btnClearSearch.classList.add('hidden');
+      state.detailSessionIds = null;
       renderWordList();
       els.searchInput.focus();
     });
@@ -2366,6 +2588,7 @@
       if (!btn || btn.disabled) return;
       const letter = btn.dataset.letter;
       state.activeLetter = letter;
+      state.detailSessionIds = null;
 
       if (state.searchQuery) {
         state.searchQuery = '';
@@ -2395,14 +2618,15 @@
       }
     });
 
-    // 单词列表点击
+    // 单词列表点击（锁定当前列表顺序快照，避免详情页加入复习后切词跳词）
     els.wordList.addEventListener('click', (e) => {
       const item = e.target.closest('.word-item');
       if (!item) return;
       const id = item.dataset.wordId;
       if (!id) return;
+      state.detailSessionIds = getFilteredWords().map((w) => w.id);
       state.selectedWordId = id;
-      renderWordList();
+      renderWordList({ preserveDetail: true });
       if (window.innerWidth <= 860) {
         openMobileDetail();
       }
@@ -2500,20 +2724,40 @@
         return;
       }
 
+      const statusAction = e.target.closest('[data-status-action]');
+      if (statusAction) {
+        const act = statusAction.dataset.statusAction;
+        if (act === 'show-all') {
+          setStatusFilter('all');
+        } else if (act === 'go-review') {
+          switchMode('review');
+        }
+        return;
+      }
+
       const actionEl = e.target.closest('[data-action]');
       if (actionEl) {
         const action = actionEl.dataset.action;
         const wordId = actionEl.dataset.wordId;
-        if (action === 'add-study' && wordId) {
-          window.SM2Store.addWordToStudy(wordId);
+        if ((action === 'add-study' || action === 'remove-study') && wordId) {
+          // 防跳词保护：在变更学习状态前捕获当前筛选顺序快照，保留当前卡片不踢出
+          if (!Array.isArray(state.detailSessionIds) || state.detailSessionIds.length === 0) {
+            state.detailSessionIds = getFilteredWords().map((w) => w.id);
+          }
+          if (action === 'add-study') {
+            window.SM2Store.addWordToStudy(wordId);
+          } else {
+            window.SM2Store.removeWordFromStudy(wordId);
+          }
           updateHeaderStats();
-          renderWordList();
-          showToast(t().toastAddedStudy);
-        } else if (action === 'remove-study' && wordId) {
-          window.SM2Store.removeWordFromStudy(wordId);
-          updateHeaderStats();
-          renderWordList();
-          showToast(t().toastRemovedStudy);
+          updateStatusFilterUI();
+          if (els.browseView.classList.contains('mobile-detail-open')) {
+            renderDetail();
+          } else {
+            renderAlphaBar();
+            renderWordList({ preserveDetail: true });
+          }
+          showToast(action === 'add-study' ? t().toastAddedStudy : t().toastRemovedStudy);
         }
         return;
       }
@@ -2668,11 +2912,14 @@
           showToast(t().toastImportFail(result.error));
           return;
         }
+        state.detailSessionIds = null;
         updateHeaderStats();
+        updateStatusFilterUI();
         if (state.currentMode === 'review') {
           rebuildReviewQueue();
           renderReviewView();
         } else {
+          renderAlphaBar();
           renderWordList();
         }
         showToast(t().toastImportOk(result.count));
@@ -2965,6 +3212,7 @@
 
     applyStaticTranslations();
     syncBodyViewState();
+    updateStatusFilterUI();
     if (els.progressSummary) {
       els.progressSummary.textContent = t().loadingLevel(state.currentLevel.toUpperCase());
     }
