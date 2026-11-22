@@ -110,6 +110,21 @@
           <button type="button" class="clear-btn hidden" id="btnClearSearch" aria-label="清除搜索">×</button>
         </div>
 
+        <div class="status-filter-bar" id="statusFilterBar" role="tablist" aria-label="学习状态筛选">
+          <button type="button" class="status-filter-chip active" data-status-filter="all" id="filterStatusAll" role="tab" aria-selected="true">
+            <span id="filterStatusAllLabel">全部</span>
+            <span class="filter-chip-count" id="filterCountAll">0</span>
+          </button>
+          <button type="button" class="status-filter-chip" data-status-filter="unlearned" id="filterStatusUnlearned" role="tab" aria-selected="false">
+            <span id="filterStatusUnlearnedLabel">未学习</span>
+            <span class="filter-chip-count" id="filterCountUnlearned">0</span>
+          </button>
+          <button type="button" class="status-filter-chip" data-status-filter="learned" id="filterStatusLearned" role="tab" aria-selected="false">
+            <span id="filterStatusLearnedLabel">已学习</span>
+            <span class="filter-chip-count" id="filterCountLearned">0</span>
+          </button>
+        </div>
+
         <div class="alpha-bar" id="alphaBar" aria-label="字母快速跳转"></div>
 
         <div class="list-meta" id="listMeta"></div>
