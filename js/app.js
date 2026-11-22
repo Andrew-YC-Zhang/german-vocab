@@ -46,9 +46,10 @@
         '.json</code> 填入词条。',
       emptyLevelTitle: (lv) => lv + ' 词库待扩充',
       emptyLevelDesc:
-        '目前完整词库已收录在 A1 和 A2 中，您可以切换到 A1 或 A2 体验全部功能，或后续按相同 JSON 格式扩充此等级词库。',
+        '目前完整词库已收录在 A1、A2 和 B1 中，您可以切换到 A1、A2 或 B1 体验全部功能，或后续按相同 JSON 格式扩充此等级词库。',
       jumpA1: '切换到 A1 词库',
       jumpA2: '切换到 A2 词库',
+      jumpB1: '切换到 B1 词库',
       noSearchResult: (q) => '未找到与“' + q + '”匹配的单词。',
       selectWordTitle: '请选择一个单词',
       selectWordDesc: '点击左侧列表中的任意德语单词，查看完整释义、变格/变位表和例句。',
@@ -84,9 +85,10 @@
       auxChip: (aux) => '助动词：' + aux,
       reviewCounter: (done, rem) => '本次已完成 ' + done + ' 词 · 队列剩余 ' + rem + ' 词',
       reviewEmptyLevelTitle: '当前等级暂无词条',
-      reviewEmptyLevelDesc: '您可以切换到 A1 或 A2 词库，或点击上方「全部等级」开始复习。',
+      reviewEmptyLevelDesc: '您可以切换到 A1、A2 或 B1 词库，或点击上方「全部等级」开始复习。',
       switchToA1Short: '切换到 A1',
       switchToA2Short: '切换到 A2',
+      switchToB1Short: '切换到 B1',
       reviewDoneCurrent: '已复习完当前到期单词！',
       reviewNoDue: '今日暂无到期复习词',
       reviewUnlearnedDescHtml: (n) =>
@@ -245,9 +247,10 @@
         '.json</code> to expand this level.',
       emptyLevelTitle: (lv) => lv + ' Vocabulary Coming Soon',
       emptyLevelDesc:
-        'Complete vocabulary sets are currently available in A1 and A2. Switch to A1 or A2 to explore all features, or add entries to this level using the same JSON format.',
+        'Complete vocabulary sets are currently available in A1, A2, and B1. Switch to A1, A2, or B1 to explore all features, or add entries to this level using the same JSON format.',
       jumpA1: 'Switch to A1',
       jumpA2: 'Switch to A2',
+      jumpB1: 'Switch to B1',
       noSearchResult: (q) => 'No words found matching "' + q + '".',
       selectWordTitle: 'Select a word',
       selectWordDesc:
@@ -284,9 +287,10 @@
       auxChip: (aux) => 'Aux: ' + aux,
       reviewCounter: (done, rem) => 'Completed ' + done + ' · Remaining ' + rem,
       reviewEmptyLevelTitle: 'No words in this level yet',
-      reviewEmptyLevelDesc: 'Switch to A1 or A2, or select "All Levels" above to start reviewing.',
+      reviewEmptyLevelDesc: 'Switch to A1, A2, or B1, or select "All Levels" above to start reviewing.',
       switchToA1Short: 'Switch to A1',
       switchToA2Short: 'Switch to A2',
+      switchToB1Short: 'Switch to B1',
       reviewDoneCurrent: 'All due cards reviewed!',
       reviewNoDue: 'No cards due today',
       reviewUnlearnedDescHtml: (n) =>
@@ -611,11 +615,14 @@
       .replace(/'/g, '&#39;');
   }
 
-  // 获取用于德语字母表排序与首字母分组的核心词干（忽略前缀 (sich) / sich）
+  // 获取用于德语字母表排序与首字母分组的核心词干（忽略前缀 (sich) / (sich etwas) / sich 与后缀连字符 -）
   function getGermanSortKey(word) {
     const clean = String(word || '').trim();
     if (!clean || clean === 'sich') return clean;
-    return clean.replace(/^\(sich\)\s+/i, '').replace(/^sich\s+/i, '');
+    return clean
+      .replace(/^\(sich(?:\s+etwas)?\)\s+/i, '')
+      .replace(/^sich\s+/i, '')
+      .replace(/^-+/, '');
   }
 
   // 获取德语单词对应的 A-Z 首字母（ä->A, ö->O, ü->U, ß->S）
@@ -696,9 +703,11 @@
 
   function getSpeakWordText(wordObj) {
     if (wordObj.pos === 'noun' && wordObj.article) {
-      return wordObj.article + ' ' + wordObj.word;
+      return wordObj.article + ' ' + String(wordObj.word || '').replace(/\s*\((?:nur\s+)?Pl\.\)$/i, '');
     }
-    return String(wordObj.word || '').replace(/^\(sich\)\s+/i, 'sich ');
+    return String(wordObj.word || '')
+      .replace(/^\(sich(?:\s+etwas)?\)\s+/i, 'sich ')
+      .replace(/^-+/, '');
   }
 
   function getPosBadgeClass(wordObj) {
@@ -715,7 +724,14 @@
     if (w.pos === 'noun') {
       const pl = String(w.plural || '');
       const lbl = String(w.posLabel || '');
-      if (lbl.includes('复数名词') || pl.includes('仅复数') || pl.includes('常用复数') || pl.includes('多用复数')) {
+      if (
+        lbl.includes('复数名词') ||
+        lbl.includes('常用复数') ||
+        pl.includes('仅复数') ||
+        pl.includes('常用复数') ||
+        pl.includes('多用复数') ||
+        /\((?:nur\s+)?Pl\.\)/i.test(pl)
+      ) {
         return 'Plural Noun';
       }
       if (w.gender === 'm') return 'Masculine Noun';
@@ -740,6 +756,9 @@
       else if (irreg) parts.push('Irregular');
       else parts.push('Regular');
       return (isPhrase ? 'Verb Phrase · ' : 'Verb · ') + parts.join(', ');
+    }
+    if (w.pos === 'prefix' && String(w.posLabel || '').includes('后缀')) {
+      return 'Suffix';
     }
     const map = {
       adjective: 'Adjective',
@@ -774,6 +793,8 @@
       .replace(/过去分词不加\s*ge-/g, 'no ge- in Perfekt')
       .replace(/过去分词无\s*ge-/g, 'no ge- in Perfekt')
       .replace(/-ieren\s*结尾无\s*ge-/g, '-ieren, no ge- in Perfekt')
+      .replace(/无\s*ge-/g, 'no ge- in Perfekt')
+      .replace(/词干\s*([^\s,]+)\s*加\s*-e-/g, 'stem $1 + -e-')
       .replace(/词干变化/g, 'stem change')
       .replace(/可选/g, 'optional')
       .replace(/表“做到\/完成”/g, "meaning 'manage / accomplish'")
@@ -796,8 +817,15 @@
 
   function localizeGrammarNote(text) {
     const raw = String(text || '');
-    if (!isEn() || !CJK_REGEX.test(raw)) return raw;
-    return raw
+    if (!isEn()) return raw;
+    let out = raw
+      .replace(/\(nur Singular\)/gi, '(singular only)')
+      .replace(/\(meist Singular\)/gi, '(usually singular)')
+      .replace(/\(nur Pl\.\)/gi, '(plural only)')
+      .replace(/\(Pl\.\)/gi, '(plural)')
+      .replace(/\(Sg\.\)/gi, '(singular)');
+    if (!CJK_REGEX.test(out)) return out;
+    return out
       .replace(/\(通常无复数\/无冠词\)/g, '(uncountable / no article)')
       .replace(/\(通常无复数\)/g, '(uncountable)')
       .replace(/\(不可数\)/g, '(uncountable)')
@@ -1636,7 +1664,10 @@
     let submetaHtml = '';
     if (w.pos === 'noun') {
       const pluralRaw = localizeGrammarNote(w.plural || '-');
-      const pluralDisplay = /^[-–—]/.test(pluralRaw.trim()) ? pluralRaw : 'die ' + pluralRaw;
+      const trimmedPl = pluralRaw.trim();
+      const pluralDisplay = /^[-–—(]/.test(trimmedPl) || /^die\s+/i.test(trimmedPl)
+        ? pluralRaw
+        : 'die ' + pluralRaw;
       submetaHtml =
         '<span>' +
         escapeHtml(dict.articleLabel) +
@@ -1752,7 +1783,11 @@
 
     const showNote = w.note && (!enMode || !CJK_REGEX.test(w.note));
     const noteHtml = showNote
-      ? '<div class="word-note">💡 ' + escapeHtml(w.note) + '</div>'
+      ? '<div class="word-note">💡 ' +
+        escapeHtml(w.note)
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/`([^`]+)`/g, '<code>$1</code>') +
+        '</div>'
       : '';
 
     const transitionClass = opts.transition ? ' slide-' + opts.transition : '';
@@ -1886,6 +1921,8 @@
           escapeHtml(t().jumpA1) +
           '</button><button type="button" class="secondary-btn" id="btnJumpA2">' +
           escapeHtml(t().jumpA2) +
+          '</button><button type="button" class="secondary-btn" id="btnJumpB1">' +
+          escapeHtml(t().jumpB1) +
           '</button></div>'
         : '') +
       '</div>';
@@ -1897,6 +1934,10 @@
     const jumpA2Btn = document.getElementById('btnJumpA2');
     if (jumpA2Btn) {
       jumpA2Btn.addEventListener('click', () => switchLevel('a2'));
+    }
+    const jumpB1Btn = document.getElementById('btnJumpB1');
+    if (jumpB1Btn) {
+      jumpB1Btn.addEventListener('click', () => switchLevel('b1'));
     }
   }
 
@@ -1953,6 +1994,9 @@
           '</button>' +
           '<button type="button" class="secondary-btn" data-review-action="switch-a2">' +
           escapeHtml(dict.switchToA2Short) +
+          '</button>' +
+          '<button type="button" class="secondary-btn" data-review-action="switch-b1">' +
+          escapeHtml(dict.switchToB1Short) +
           '</button>' +
           '</div></div>';
         return;
@@ -2024,7 +2068,10 @@
               : '动词 (Verb)'
             : getLocalizedPosLabel(currentWord);
 
-      const speakFront = String(currentWord.word || '').replace(/^\(sich\)\s+/i, 'sich ');
+      const speakFront = String(currentWord.word || '')
+        .replace(/^\(sich(?:\s+etwas)?\)\s+/i, 'sich ')
+        .replace(/\s*\((?:nur\s+)?Pl\.\)$/i, '')
+        .replace(/^-+/, '');
 
       els.reviewStage.innerHTML =
         '<div class="flashcard-front">' +
@@ -2413,6 +2460,8 @@
           switchLevel('a1');
         } else if (act === 'switch-a2') {
           switchLevel('a2');
+        } else if (act === 'switch-b1') {
+          switchLevel('b1');
         } else if (act === 'add-unlearned') {
           const pool =
             state.reviewScope === 'all'
