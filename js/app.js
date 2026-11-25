@@ -50,10 +50,11 @@
         '.json</code> 填入词条。',
       emptyLevelTitle: (lv) => lv + ' 词库待扩充',
       emptyLevelDesc:
-        '目前完整词库已收录在 A1、A2 和 B1 中，您可以切换到 A1、A2 或 B1 体验全部功能，或后续按相同 JSON 格式扩充此等级词库。',
+        '完整词库已收录在 A1、A2、B1 和 B2 中，您可以直接切换任意等级体验全部功能。',
       jumpA1: '切换到 A1 词库',
       jumpA2: '切换到 A2 词库',
       jumpB1: '切换到 B1 词库',
+      jumpB2: '切换到 B2 词库',
       noSearchResult: (q) => '未找到与“' + q + '”匹配的单词。',
       statusFilterLabel: '学习状态筛选',
       filterAll: '全部',
@@ -100,10 +101,11 @@
       auxChip: (aux) => '助动词：' + aux,
       reviewCounter: (done, rem) => '本次已完成 ' + done + ' 词 · 队列剩余 ' + rem + ' 词',
       reviewEmptyLevelTitle: '当前等级暂无词条',
-      reviewEmptyLevelDesc: '您可以切换到 A1、A2 或 B1 词库，或点击上方「全部等级」开始复习。',
+      reviewEmptyLevelDesc: '您可以切换到 A1、A2、B1 或 B2 词库，或点击上方「全部等级」开始复习。',
       switchToA1Short: '切换到 A1',
       switchToA2Short: '切换到 A2',
       switchToB1Short: '切换到 B1',
+      switchToB2Short: '切换到 B2',
       reviewDoneCurrent: '已复习完当前到期单词！',
       reviewNoDue: '今日暂无到期复习词',
       reviewUnlearnedDescHtml: (n) =>
@@ -264,10 +266,11 @@
         '.json</code> to expand this level.',
       emptyLevelTitle: (lv) => lv + ' Vocabulary Coming Soon',
       emptyLevelDesc:
-        'Complete vocabulary sets are currently available in A1, A2, and B1. Switch to A1, A2, or B1 to explore all features, or add entries to this level using the same JSON format.',
+        'Complete vocabulary sets are available in A1, A2, B1, and B2. Switch to any level to explore all features.',
       jumpA1: 'Switch to A1',
       jumpA2: 'Switch to A2',
       jumpB1: 'Switch to B1',
+      jumpB2: 'Switch to B2',
       noSearchResult: (q) => 'No words found matching "' + q + '".',
       statusFilterLabel: 'Filter by learning status',
       filterAll: 'All',
@@ -315,10 +318,11 @@
       auxChip: (aux) => 'Aux: ' + aux,
       reviewCounter: (done, rem) => 'Completed ' + done + ' · Remaining ' + rem,
       reviewEmptyLevelTitle: 'No words in this level yet',
-      reviewEmptyLevelDesc: 'Switch to A1, A2, or B1, or select "All Levels" above to start reviewing.',
+      reviewEmptyLevelDesc: 'Switch to A1, A2, B1, or B2, or select "All Levels" above to start reviewing.',
       switchToA1Short: 'Switch to A1',
       switchToA2Short: 'Switch to A2',
       switchToB1Short: 'Switch to B1',
+      switchToB2Short: 'Switch to B2',
       reviewDoneCurrent: 'All due cards reviewed!',
       reviewNoDue: 'No cards due today',
       reviewUnlearnedDescHtml: (n) =>
@@ -760,10 +764,27 @@
 
   function getSpeakWordText(wordObj) {
     if (wordObj.pos === 'noun' && wordObj.article) {
-      return wordObj.article + ' ' + String(wordObj.word || '').replace(/\s*\((?:nur\s+)?Pl\.\)$/i, '');
+      const rawArt = String(wordObj.article).trim();
+      const cleanWord = String(wordObj.word || '')
+        .replace(/\s*\((?:nur\s+)?Pl\.\)$/i, '')
+        .replace(/\/in$/i, '')
+        .trim();
+      if (/^[—–-]/.test(rawArt)) {
+        return cleanWord;
+      }
+      const cleanArt = rawArt
+        .replace(/\s*\(ohne Artikel\)$/i, '')
+        .replace(/\s*\(Pl\.\)$/i, '')
+        .trim();
+      if (cleanArt === 'der/die') {
+        const mascWord = cleanWord.includes('/') ? cleanWord.split('/')[0].trim() : cleanWord;
+        return 'der ' + mascWord;
+      }
+      return (cleanArt ? cleanArt + ' ' : '') + cleanWord;
     }
     return String(wordObj.word || '')
       .replace(/^\(sich(?:\s+etwas)?\)\s+/i, 'sich ')
+      .replace(/\s*\(sich\)$/i, '')
       .replace(/^-+/, '');
   }
 
@@ -781,9 +802,15 @@
     if (w.pos === 'noun') {
       const pl = String(w.plural || '');
       const lbl = String(w.posLabel || '');
+      const art = String(w.article || '');
+      if (lbl.includes('阳/阴') || art.includes('/')) {
+        return 'Masculine / Feminine Noun';
+      }
       if (
         lbl.includes('复数名词') ||
         lbl.includes('常用复数') ||
+        lbl.includes('· 复数') ||
+        /\(Pl\.\)/i.test(art) ||
         pl.includes('仅复数') ||
         pl.includes('常用复数') ||
         pl.includes('多用复数') ||
@@ -865,7 +892,7 @@
     else if (/trennbar|可分/i.test(raw)) tags.push('Separable');
     if (/gemischt|混合/i.test(raw)) tags.push('Mixed');
     else if (/unregelmäßig|不规则/i.test(raw)) tags.push('Irregular');
-    else if (/regelmäßig|规则/i.test(raw)) tags.push('Regular');
+    else if (/regelmäßig|regular|规则/i.test(raw)) tags.push('Regular');
     if (/Hilfsverb|助动词/i.test(raw)) tags.push('Auxiliary');
     const nounType = /动词短语/.test(raw) ? 'verb phrase' : 'verb';
     const base = (tags.length > 0 ? tags.join(', ') : 'Verb') + (tags.includes('Verb') ? '' : ' ' + nounType);
@@ -877,10 +904,14 @@
     if (!isEn()) return raw;
     let out = raw
       .replace(/\(nur Singular\)/gi, '(singular only)')
+      .replace(/\(nur Sg\.\)/gi, '(singular only)')
       .replace(/\(meist Singular\)/gi, '(usually singular)')
+      .replace(/\(meist Sg\.\)/gi, '(usually singular)')
       .replace(/\(nur Pl\.\)/gi, '(plural only)')
       .replace(/\(Pl\.\)/gi, '(plural)')
-      .replace(/\(Sg\.\)/gi, '(singular)');
+      .replace(/\(Sg\.\)/gi, '(singular)')
+      .replace(/\(nur Sg\. für Kultivierung; Pl\. Anbauten für Gebäude\)/g, '(cultivation: sg. only; buildings pl.: Anbauten)')
+      .replace(/\(nur Sg\. für Struktur\/Errichtung; Pl\. Aufbauten für Konstruktionen\)/g, '(structure: sg. only; constructions pl.: Aufbauten)');
     if (!CJK_REGEX.test(out)) return out;
     return out
       .replace(/\(通常无复数\/无冠词\)/g, '(uncountable / no article)')
@@ -888,6 +919,10 @@
       .replace(/\(不可数\)/g, '(uncountable)')
       .replace(/\(无复数\)/g, '(no plural)')
       .replace(/\(通常仅用单数\)/g, '(usually singular)')
+      .replace(/\(通常仅单数\)/g, '(usually singular)')
+      .replace(/\(历史专指仅单数；一般义复数 Wenden\)/g, '(historical: singular only; general pl.: Wenden)')
+      .replace(/\(审查义仅单数；成绩义复数 Zensuren\)/g, '(censorship: singular only; grades pl.: Zensuren)')
+      .replace(/\(南德\/奥\/瑞亦用 ist zugrunde gelegen\)/g, '(South DE/AT/CH also: ist zugrunde gelegen)')
       .replace(/\(口语单数\)/g, '(colloquial singular)')
       .replace(/\(少用\)/g, '(rare)')
       .replace(/\(此义仅复数\)/g, '(plural only)')
@@ -897,6 +932,7 @@
       .replace(/\(无单数\)/g, '(no singular)')
       .replace(/\(通常无冠词\)/g, '(usually no article)')
       .replace(/\(定冠词后\)/g, '(after def. article)')
+      .replace(/\(定冠词\)/g, '(after def. article)')
       .replace(/\(无冠词\)/g, '(no article)')
       .replace(/\(多用第三人称\)/g, '(mostly 3rd person)')
       .replace(/\(通常仅用 es\)/g, '(usually impersonal: es)')
@@ -1331,8 +1367,10 @@
 
   function formatArticleHtml(wordObj) {
     if (wordObj.pos !== 'noun' || !wordObj.article) return '';
+    const art = String(wordObj.article).trim();
+    if (/^[—–-]/.test(art)) return '';
     const cls = 'article-' + (wordObj.gender || 'm');
-    return '<span class="article-tag ' + cls + '">' + escapeHtml(wordObj.article) + '</span>';
+    return '<span class="article-tag ' + cls + '">' + escapeHtml(art) + '</span>';
   }
 
   function escapeRegExp(str) {
@@ -2138,6 +2176,8 @@
           escapeHtml(t().jumpA2) +
           '</button><button type="button" class="secondary-btn" id="btnJumpB1">' +
           escapeHtml(t().jumpB1) +
+          '</button><button type="button" class="secondary-btn" id="btnJumpB2">' +
+          escapeHtml(t().jumpB2) +
           '</button></div>'
         : '') +
       '</div>';
@@ -2153,6 +2193,10 @@
     const jumpB1Btn = document.getElementById('btnJumpB1');
     if (jumpB1Btn) {
       jumpB1Btn.addEventListener('click', () => switchLevel('b1'));
+    }
+    const jumpB2Btn = document.getElementById('btnJumpB2');
+    if (jumpB2Btn) {
+      jumpB2Btn.addEventListener('click', () => switchLevel('b2'));
     }
   }
 
@@ -2254,6 +2298,9 @@
           '</button>' +
           '<button type="button" class="secondary-btn" data-review-action="switch-b1">' +
           escapeHtml(dict.switchToB1Short) +
+          '</button>' +
+          '<button type="button" class="secondary-btn" data-review-action="switch-b2">' +
+          escapeHtml(dict.switchToB2Short) +
           '</button>' +
           '</div></div>';
         return;
@@ -2785,6 +2832,8 @@
           switchLevel('a2');
         } else if (act === 'switch-b1') {
           switchLevel('b1');
+        } else if (act === 'switch-b2') {
+          switchLevel('b2');
         } else if (act === 'add-unlearned') {
           const pool =
             state.reviewScope === 'all'
